@@ -92,6 +92,9 @@ The single content store: immutable, append-only version history for all guide c
 - `author_id`: who wrote this specific revision. May differ from the guide's original author, which is how edit credit spreads across contributors.
 - `created_at`: when this revision was written.
 - `status`: draft lifecycle state (see enum below).
+- `is_purged`: boolean, default `false`; set `true` when the content fields are nulled by a purge. Distinguishes a deliberate purge from accidental data corruption (a null `body` that nobody intended). Without it, an empty content row is ambiguous.
+
+A purged revision has its content fields nulled in place and `is_purged = true` (see [Content removal](#content-removal)). Who purged it and when stays on the covering `content_holds` row; the nulled content plus `is_purged` is the physical tombstone.
 
 Status enum values are:
 
@@ -103,6 +106,45 @@ Submitting a revision is the action that creates its `guide_review_cases` row, i
 Note: `accepted` is not a stored revision value. A revision "reads as accepted" when its review case has `status = approved`. `published` is also deliberately **not** a revision value: "published" describes the guide or guide base node. A revision also never becomes `archived`; archiving happens at the guide or guide base level.
 
 **Rollback.** Rollback never deletes newer rows. It inserts a new revision that copies an older one's content. Through this, the version history shows that a rollback occurred through the change_summary.
+
+### `content_holds`
+
+Moderation record for hiding or purging content (see [Content removal](#content-removal)). Decoupled from the content so `guide_revisions` stays immutable for hides.
+
+- `id`: primary key of the hold.
+- `revision_id`: nullable FK to `guide_revisions`. Set for a single-revision hold.
+- `guide_id`: nullable FK to `guides`. Set for a whole-guide hold.
+- `guide_base_id`: nullable FK to `guide_bases`. Set for a whole-topic hold.
+- `hold_type`: `dmca | csam | ncii | violent_extremism | tos_violation | gdpr_erasure | court_order | law_enforcement | counternotice`.
+- `action`: `hidden` (reversible, content untouched), `purge` (irreversible content destruction), or `legal_hold` (must preserve, purge blocked until `preserve_until`).
+- `preserve_until`: nullable timestamp; set on a `legal_hold`. While `preserve_until > now()`, purge of the covered content is blocked. Duration is set per the governing obligation.
+- `actor_id`: FK to `profiles.id`; the moderator who placed the hold.
+- `reason`: free-text note.
+- `created_at`: when the hold was placed.
+- `released_at`: nullable; set when a `hidden` hold is lifted. Null = active.
+- `released_by`: nullable FK to `profiles.id`; the moderator who lifted the `hidden` hold. Null while active. Recorded separately from `actor_id` so the audit trail shows who placed *and* who lifted.
+- `purged_at`: nullable; set when a `purge` finishes executing.
+- `purged_by`: nullable FK to `profiles.id`; the moderator who executed the `purge`. Null until the purge completes. Separate from `actor_id` for the same audit reason.
+
+Exactly one of `revision_id` / `guide_id` / `guide_base_id` is set. A node-scoped hold fans out to the revisions beneath it at purge time.
+
+Holds are multi-row: one piece of content can carry several at once (e.g. a `hidden` hold to take it out of view *and* a `legal_hold` to preserve it for reporting). A `csam` item is typically held this way (hidden, preserved, reported) and only purged after the preservation window passes.
+
+### `media_assets` and `revision_assets`
+
+The manifest of object-storage assets, so a purge can delete media reliably instead of scraping URLs out of markdown.
+
+`media_assets`:
+
+- `id`: primary key of the asset.
+- `storage_key`: object-storage key (not the public URL).
+- `uploaded_by`: FK to `profiles.id`.
+- `created_at`: upload time.
+
+`revision_assets`: many-to-many between revisions and assets, written when a revision is saved.
+
+- `revision_id`: FK to `guide_revisions`.
+- `asset_id`: FK to `media_assets`. The pair `(revision_id, asset_id)` is the primary key.
 
 ### `guide_edges`
 
@@ -144,6 +186,7 @@ Subject tags, such as Math, Physics, or Game Development. Subjects are not conta
 - `id`: primary key of the subject.
 - `slug`: stable URL identifier for the subject (e.g. `game-development`).
 - `name`: human-readable subject name (e.g. `Game Development`).
+- `creator_id`: FK to `profiles.id` (the user who created the subject).
 - `created_at`: subject creation time.
 
 ### `guide_subjects`
@@ -364,6 +407,27 @@ Each level still keeps its own `status` because it answers a question only that 
 - `guides.status` — is **this method/alternative** live, while its base and siblings stay published? You can archive one guide without touching the base.
 - `guide_revisions.status` — is **this specific draft** still being written or already handed to review? This is per-revision and has no meaning at the node level.
 
+### Content removal
+
+An `action` field picks the path in the `content_holds` table: `hidden` (reversible) or `purge` (irreversible). Content only lives on `guide_revisions`, so every actual content destruction lands there (`guides` and `guide_bases` hold no `body` to destroy).
+
+**Hide (`hidden`) — reversible, e.g. DMCA.** Insert a `content_holds` row; touch nothing else. The display layer hides any content with an active hold (`released_at IS NULL`). The revision row is never mutated, so immutability and history stay intact. Lift by setting `released_at`. The hold row is the audit trail.
+
+**Purge (`purge`) — irreversible, e.g. CSAM or court order.** The content is destroyed but the row survives as a tombstone, so the audit trail (author, dates, which guide) and all foreign keys stay valid. Nulling the body alone is not enough — copies live in three places, and a purge must reach all three:
+
+1. **Database row.** Null the content fields (`body`, `title`, `summary`, `change_summary`) and set `is_purged = true`; keep the skeleton (`id`, `guide_id`, `revision_number`, `author_id`, `created_at`). The row stays so pointers (`current_revision_id`, review cases) resolve to a tombstone, not a dangling id. The `is_purged` flag marks the tombstone as deliberate (vs. accidental corruption that left content null); who/when lives on the covering `content_holds` row.
+2. **Object storage.** Media is referenced by URL in the body, so parsing markdown to find assets is unreliable. Delete via the manifest instead: iterate `revision_assets → media_assets.storage_key`, delete each key from the bucket, and verify it is gone. Before deleting a key, confirm no surviving (non-purged) revision still references that asset — shared assets must outlive a single revision's purge. (A CSAM legal purge overrides this and removes the asset regardless of references.) Because the DB and the bucket cannot share a transaction, queue one delete job per asset and mark the purge complete only once every job verifies deletion; a periodic orphan sweep reconciles bucket keys with no live manifest row as a backstop.
+3. **Backups.** Live nulling does nothing to existing DB/bucket backups. Policy (pick one, document it): **bounded retention** — backups expire after N days so purged content ages out (lingers ≤ N days in cold storage); or **crypto-shred** — per-object encryption keys, where deleting the key renders ciphertext unrecoverable in every backup at once. Bounded retention is the v1 default; crypto-shred is the upgrade if a notice demands immediate backup eradication.
+
+**Node-scoped purge.** A whole guide or topic takedown is a fan-out, since the content lives below the node:
+
+- **Whole guide:** purge every `guide_revisions` row under it (step 1) and its media (step 2); scrub `guides.slug` if the slug carries the offending text; set `guides.status = archived`. If it was canonical, `guide_bases.canonical_guide_id` still resolves to the tombstone — re-point or leave per policy.
+- **Whole topic:** fan the guide purge over every guide under the base, then scrub `guide_bases.title` and `slug` (the base's own content) and set `status = archived`.
+
+The `content_holds` row records the scope (revision, guide, or base); the destruction always lands on revision rows plus the media bucket.
+
+**CSAM caveat.** Law may require preserve-and-report (e.g. NCMEC in the US) *before* destruction, for a fixed window. Model this with a `legal_hold` row carrying `preserve_until`; while that window is open the purge flow is blocked (step 2 of flow 10). Do not auto-fire a purge on a `csam` hold; the flow is hide → legal hold → preserve a sealed evidence copy → report → purge after the window. Confirm the required duration with counsel rather than assuming one (US federal CSAM preservation under 18 U.S.C. § 2258A(h) is 90 days, extendable to 180).
+
 ### Slugs and URLs
 
 Slugs live in two layers, one stable identifier each:
@@ -543,6 +607,7 @@ A user starts a brand-new topic from scratch.
 1. `guide_bases` → insert the node: `title`, `slug`, `knowledge_type`, `status = 'draft'`, `canonical_guide_id = NULL`. No content yet.
 2. `guides` → insert the first guide under it: `guide_base_id`, `author_id`, `status = 'draft'`, `current_revision_id = NULL`, `slug = NULL` (addressed by id until first publish).
 3. `guide_revisions` → insert revision 1 while the author writes: `guide_id`, `revision_number = 1`, `title`, `summary`, `body`, `author_id`, `status = 'draft'`.
+4. `media_assets` / `revision_assets` → for each asset embedded in the body, upsert the asset (`storage_key`) and insert a `(revision_id, asset_id)` link. This manifest is what a later purge deletes from object storage, instead of scraping URLs from markdown.
 
 The author edits freely; each save can overwrite the draft revision (drafts are mutable up to submission; published revisions are immutable).
 
@@ -576,7 +641,7 @@ A second author adds another guide under a topic that already has a canonical gu
 
 ### 3. Edit an existing published guide
 
-1. `guide_revisions` → insert the next revision: `revision_number = N+1`, edited `title`/`summary`/`body`, `change_summary`, `author_id` (may differ from original author → spreads edit credit), `status = 'draft'` then `submitted` on handoff.
+1. `guide_revisions` → insert the next revision: `revision_number = N+1`, edited `title`/`summary`/`body`, `change_summary`, `author_id` (may differ from original author → spreads edit credit), `status = 'draft'` then `submitted` on handoff. `media_assets` / `revision_assets` → link this revision's assets, same as flow 1 step 4.
 2. `review_cases` → `case_type = 'guide_edit'`; `guide_review_cases` → points at the new `guide_revision_id`.
 3. Panel / decisions / close: same as flow 1 steps 5–7.
 4. **On approval**: `guides.current_revision_id` → the new revision. `guides.slug` is **not** changed even if the title changed (slug frozen at first publish). The previous revision stays in history.
@@ -620,4 +685,24 @@ When authoring a guide base, the author wires it into the graph.
 
 1. `subjects` → row exists (or insert if new, governance-gated).
 2. `guide_subjects` → insert `(guide_base_id, subject_id)` per tag. One base can be tagged into several subjects; the composite PK blocks duplicate tags. Subject views, frontiers, and floors then filter the global graph through these rows.
+
+### 9. Hide content (reversible, e.g. DMCA)
+
+A moderator takes content out of view without destroying it. See [Content removal](#content-removal).
+
+1. `content_holds` → insert: `action = 'hidden'`, `hold_type`, `actor_id`, `reason`, and exactly one scope (`revision_id` / `guide_id` / `guide_base_id`).
+2. Display layer hides any content with an active hold (`released_at IS NULL`). No content row is touched, so immutability and history are preserved.
+3. **To lift:** `content_holds` → set `released_at` and `released_by`. Content reappears; the hold row remains as the audit trail.
+
+### 10. Purge content (irreversible, e.g. CSAM / court order)
+
+A moderator destroys content while keeping the audit trail. See [Content removal](#content-removal).
+
+1. `content_holds` → insert: `action = 'purge'`, `hold_type`, `actor_id`, `reason`, scope. For a `csam` hold, place a `legal_hold` and preserve-and-report **before** purging.
+2. **Check for an active legal hold.** If any covering `content_holds` row has `action = 'legal_hold'` with `preserve_until > now()`, the purge is blocked until the window passes. Preservation outranks destruction.
+3. **Resolve scope to revisions.** A `revision_id` hold targets that row; a `guide_id` / `guide_base_id` hold fans out to every revision beneath it.
+4. `guide_revisions` → for each target, null the content fields (`body`, `title`, `summary`, `change_summary`) and set `is_purged = true`; keep the skeleton row as a tombstone. Pointers (`current_revision_id`, review cases) still resolve.
+5. **Object storage** → for each target revision, read `revision_assets → media_assets.storage_key`, delete each key from the bucket and verify, skipping any asset still referenced by a non-purged revision. Queue one delete job per asset; the purge is complete only when all jobs verify.
+6. **Node scope only:** scrub the node's own content — `guides.slug`, or `guide_bases.title` + `slug` — and set `status = 'archived'`. If a purged guide was canonical, re-point or leave `guide_bases.canonical_guide_id` per policy (it resolves to the tombstone).
+7. `content_holds` → set `purged_at` and `purged_by`. The revision carries `is_purged = true`; who/when stays on this hold row.
 
