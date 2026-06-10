@@ -81,16 +81,22 @@ pnpm install
 # 2. Start local Supabase (Postgres + Auth on docker)
 pnpm supabase:start
 
-# 3. Copy env files and fill in the values supabase printed
+# If your shell/OS does not resolve the local Supabase binary,
+# use one of these instead:
+# pnpm exec supabase start
+# pnpx supabase start
+
+# 3. Copy env files and fill in the values Supabase printed
 cp api/.dev.vars.example api/.dev.vars
+cp app/.env.example app/.env
 
 # 4. Run app + api side-by-side
 pnpm dev:api          # Workers dev   → http://localhost:8787
 pnpm dev:app          # Vite dev      → http://localhost:3000
 ```
 
-The Vite dev server proxies API calls to `localhost:8787`, so the browser
-sees one origin and you don't have to fight CORS.
+The app reads `VITE_API_BASE` from `app/.env` (default `http://localhost:8787`),
+and the API uses `APP_URL` from `api/.dev.vars` for CORS (default `http://localhost:3000`).
 
 > 💡 **Tip:** `pnpm dev` runs both `app` and `api` in parallel through pnpm
 > workspaces.

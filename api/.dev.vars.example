@@ -8,4 +8,4 @@ SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SECRET_KEY=
 
 # Frontend origin for CORS (Vite dev server)
-APP_URL=http://localhost:5173
+APP_URL=http://localhost:3000
