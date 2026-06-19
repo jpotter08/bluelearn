@@ -67,22 +67,31 @@ export type Database = {
       }
       guide_edges: {
         Row: {
+          created_at: string
           edge_type: Database["public"]["Enums"]["edge_type"]
           from_guide_base_id: string
           id: string
+          is_suspended: boolean
           to_guide_base_id: string
+          updated_at: string
         }
         Insert: {
+          created_at?: string
           edge_type: Database["public"]["Enums"]["edge_type"]
           from_guide_base_id: string
           id?: string
+          is_suspended?: boolean
           to_guide_base_id: string
+          updated_at?: string
         }
         Update: {
+          created_at?: string
           edge_type?: Database["public"]["Enums"]["edge_type"]
           from_guide_base_id?: string
           id?: string
+          is_suspended?: boolean
           to_guide_base_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
