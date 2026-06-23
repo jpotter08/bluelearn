@@ -29,15 +29,17 @@ The schema deliberately keeps the database source of truth small:
 - `bio`: optional short profile text.
 - `is_suspended`: optional flag for moderation actions against a member, kept separate from roles so a role is not silently lost on suspension.
 
-`roles` is not a column on `profiles`. Every user is a `learner` implicitly; granted roles (`verifier`, `moderator`, `admin`) live in `user_roles`.
+`roles` is not a column on `profiles`. Every user is a `learner` implicitly; granted roles (`verifier`, `moderator`, `curator`, `admin`) live in `user_roles`.
 
 ### `user_roles`
 
 The roles a user holds. A user may hold several at once (e.g. both `verifier` and `moderator`). `learner` is the implicit baseline and is not stored here; absence of any row means learner-only.
 
 - `user_id`: FK to `profiles.id`.
-- `role`: granted role enum `verifier | moderator | admin`.
+- `role`: granted role enum `verifier | moderator | curator | admin`.
 - `granted_at`: when the role was granted.
+
+`curator` authorizes authoring learning paths: only a holder may create a `learning_paths` row and write its revisions (see [`learning_paths`](#learning_paths)). It gates the *creation* side the way `verifier`/`moderator` gate the *review* side, and is not a moderation privilege.
 
 For now, roles are granted directly by an admin inserting the `user_roles` row. A self-service application flow is deferred for later; see [Role applications](#role-applications) under Not Yet Implemented.
 
@@ -193,6 +195,7 @@ Subject tags, such as Math, Physics, or Game Development. Subjects are not conta
 - `id`: primary key of the subject.
 - `slug`: stable URL identifier for the subject (e.g. `game-development`).
 - `name`: human-readable subject name (e.g. `Game Development`).
+- `summary`: optional short description for subject listings and the subject header. Nullable; subjects have no revision table, so it lives on the row.
 - `creator_id`: FK to `profiles.id` (the user who created the subject).
 - `created_at`: subject creation time.
 
@@ -241,7 +244,7 @@ The stable identity of a learning path: it stores no curriculum content of its o
 - `slug`: stable URL identifier (e.g. `ml-engineer`), unique **among learning paths**. Learning paths live under their own `/paths/{slug}` route namespace, so a path slug never collides with a guide base slug (`/{base-slug}`) — uniqueness only needs to hold within paths, not site-wide. Derived from the first published revision's title and frozen at first publish; never auto-changed by later title edits, exactly like `guides.slug`.
 - `current_revision_id`: nullable FK to `learning_path_revisions`. Points at the live published revision; null before the path's first publish. Creates a path ↔ revision pointer cycle, so the FK should be deferrable.
 - `status`: node-level disposition `draft | published | archived` (same shape and meaning as `guide_bases.status`). `published` once `current_revision_id` is set; `archived` retires the whole path while leaving the last revision retrievable.
-- `created_by`: FK to `profiles.id`; the path's original author.
+- `created_by`: FK to `profiles.id`; the path's original author, who must hold the `curator` role.
 - `created_at`: row creation time.
 - `updated_at`: last update time, maintained by a trigger.
 
@@ -257,7 +260,7 @@ Append-only version history plus the path's editorial metadata, mirroring `guide
 - `title`: the path's human-facing title as of this revision. Versioned; `learning_paths.slug` is derived from it at first publish and then frozen.
 - `summary`: short description for listings and the path header, as of this revision.
 - `change_summary`: curator's note describing what changed in this revision (like a commit message), driving the history list.
-- `author_id`: who authored this specific revision. May differ from the path's original `created_by`, spreading curation credit.
+- `author_id`: who authored this specific revision, who must hold the `curator` role. May differ from the path's original `created_by`, spreading curation credit.
 - `status`: draft lifecycle state `draft | submitted` only (the same shape and rationale as `guide_revisions.status`). The review verdict is not stored here; it is derived from the revision's `learning_path_review_cases` → `review_cases.status`.
 - `created_at`: when the revision was created.
 

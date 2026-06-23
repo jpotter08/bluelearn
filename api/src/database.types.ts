@@ -743,6 +743,7 @@ export type Database = {
           id: string
           name: string
           slug: string
+          summary: string | null
         }
         Insert: {
           created_at?: string
@@ -750,6 +751,7 @@ export type Database = {
           id?: string
           name: string
           slug: string
+          summary?: string | null
         }
         Update: {
           created_at?: string
@@ -757,6 +759,7 @@ export type Database = {
           id?: string
           name?: string
           slug?: string
+          summary?: string | null
         }
         Relationships: [
           {
@@ -926,7 +929,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "verifier" | "moderator" | "admin"
+      app_role: "verifier" | "moderator" | "curator" | "admin"
       case_status: "pending" | "in_review" | "approved" | "rejected"
       case_type:
         | "guide_publish"
@@ -1084,7 +1087,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["verifier", "moderator", "admin"],
+      app_role: ["verifier", "moderator", "curator", "admin"],
       case_status: ["pending", "in_review", "approved", "rejected"],
       case_type: [
         "guide_publish",
