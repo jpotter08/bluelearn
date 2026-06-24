@@ -40,3 +40,46 @@ export const mediaRouter = new Hono<HonoEnv>()
 
     return c.json({ data }, 201)
   })
+
+  // Delete a file in object storage
+  .delete('/:id', requireUser, async (c) => {
+    const id = c.req.param('id')
+    const userId = c.get('user').id
+
+    // Search database for storage key by id. Verify ownership
+    const supabase = c.get('supabase')
+
+    const { data: asset, error: fetchError } = await supabase
+      .from('media_assets')
+      .select('storage_key, uploaded_by')
+      .eq('id', id)
+      .single()
+
+    if (!asset)
+      return c.json({ error: 'Asset not found' }, 404)
+
+    if (asset.uploaded_by !== userId)
+      return c.json({ error: 'Unauthorized to delete this media asset' }, 403)
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116')
+        return c.json({ error: 'Asset not found' }, 404)
+
+      console.error('media_assets fetch failed:', fetchError)
+      return c.json({ error: 'Internal server error' }, 500)
+    }
+
+    // Delete from database
+    const { error: databaseError } = await supabase
+      .from('media_assets')
+      .delete()
+      .eq('id', id)
+
+    if (databaseError) {
+      console.error('media_assets delete failed:', databaseError)
+      return c.json({ error: 'Internal server error' }, 500)
+    }
+
+    return c.json({ message: 'Asset deleted successfully' }, 200)
+  })
+
