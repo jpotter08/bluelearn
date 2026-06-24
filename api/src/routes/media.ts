@@ -121,7 +121,7 @@ export const mediaRouter = new Hono<HonoEnv>()
     })
   })
 
-  // Get location of file, and other info, from database
+  // Get file info from database
   .get('/:id', async (c) => {
     const id = c.req.param('id')
 
@@ -129,7 +129,7 @@ export const mediaRouter = new Hono<HonoEnv>()
 
     const { data, error: fetchError } = await supabase
       .from('media_assets')
-      .select('storage_key, uploaded_by, created_at')
+      .select('uploaded_by, created_at')
       .eq('id', id)
       .single()
 
