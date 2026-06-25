@@ -6,7 +6,8 @@ properties:
   id:
     $ref: '../common/Uuid.yaml'
   title:
-    type: string
+    description: Null on an unpublished draft until the curator sets one.
+    type: [string, 'null']
     example: Backend Engineer
   change_summary:
     description: The curator's note describing what changed in this revision.

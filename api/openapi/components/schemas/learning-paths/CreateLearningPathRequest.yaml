@@ -4,6 +4,7 @@ description: >
   target guides as the initial node set.
 properties:
   title:
+    description: Optional at creation; a title is only required to publish.
     type: string
     example: Backend Engineer
   summary:
@@ -13,4 +14,4 @@ properties:
     description: Guide base ids the path is built to reach.
     items:
       $ref: '../common/Uuid.yaml'
-required: [title, target_ids]
+required: [target_ids]

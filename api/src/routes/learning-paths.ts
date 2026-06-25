@@ -30,6 +30,14 @@ export const learningPathRevisionsRouter = new Hono<HonoEnv>()
   // Overwrite a draft revision's metadata (draft only)
   .patch('/:id', requireUser, (c) => c.json({ error: 'Not implemented' }, 501))
 
+  // Add a target: flag a base as a goal and pull its prerequisite closure into
+  // the node set. Returns the recomputed snapshot.
+  .post('/:id/targets', requireUser, (c) => c.json({ error: 'Not implemented' }, 501))
+
+  // Remove a target: clear the flag and remove topics kept only to reach it.
+  // Returns the recomputed snapshot.
+  .delete('/:id/targets/:baseId', requireUser, (c) => c.json({ error: 'Not implemented' }, 501))
+
   // Edit a node: swap the chosen variant, set a note, toggle is_target, or
   // skip/re-include it. Skipping is a soft hide, not a delete.
   .patch('/:id/nodes/:baseId', requireUser, (c) => c.json({ error: 'Not implemented' }, 501))
