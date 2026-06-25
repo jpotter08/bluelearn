@@ -127,3 +127,57 @@ export const mediaRouter = new Hono<HonoEnv>()
 
     return c.json({ data }, 200)
   })
+
+  // Update a file in object storage. Keep old file in database as part of revision history
+  .patch('/:id/update', requireUser, async (c) => {
+    const id     = c.req.param('id')
+    const userId = c.get('user').id
+    const body = await c.req.formData()
+    const file = body.get('file') as File | null
+
+    if (!file) 
+      return c.json({ error: 'Missing required field: file' }, 400)
+    if (!(file instanceof File))
+      return c.json({ error: 'Field "file" must be a file upload, got ' + typeof file }, 400)
+    
+    // Upload to database
+    const supabase = c.get('supabase')
+    const entry = await uploadMediaFile(file, userId, supabase)
+
+    // Add asset_id
+    const { error: revisionError } = await supabase
+      .from('media_assets_revision')
+      .insert({
+        asset_id: id
+      })
+
+    if (revisionError)  {
+      // Delete revised file from database to save storage
+      const { error: databaseError } = await supabase
+        .from('media_assets')
+        .delete()
+        .eq('id', id)
+
+      if (databaseError) {
+        console.error('media_assets delete failed after revision upload fail:', databaseError)
+        return c.json({ error: 'Internal server error' }, 500)
+      }
+
+      console.log('Successfully deleted revision after upload fail')
+      console.log(`\tAsset ID: ${id}`)
+      return c.json({ error: 'Unable to add revision to database' }, 500)
+    }
+
+    // Get revision_id to return to user
+    const { data: revisionData, error: fetchError } = await supabase
+      .from('media_assets_revision')
+      .select('revision_id')
+    
+    if (fetchError) {
+      // Failed to fetch guides_revision.id, which media_guides_revision.id references as a foreign key
+      console.error('Failed to fetch media_assets_revision.revision_id for user')
+      return c.json({ error: 'Failed to fetch revision_id' }, 500)
+    }
+
+    return c.json({ message: 'Succesfully added revision' }, 200)
+  })
