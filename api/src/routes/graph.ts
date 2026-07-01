@@ -6,7 +6,7 @@ import {
 } from '@bluelearn/schemas'
 import { requireUser } from '../middleware/auth.middleware'
 import type { HonoEnv } from "../types"
-import { ServiceError } from '../lib/service-error.ts'
+import { ServiceError } from '../lib/service-error'
 
 // Separate routers
 export const prerequisitesRouter = new Hono()
