@@ -1,0 +1,157 @@
+@import "katex/dist/katex.min.css";
+
+/* == BRAND COLOR VARIABLES FOR MDXEDITOR == */
+.mdxeditor,
+[class*="_editorRoot"] {
+  --blue-1: var(--background);
+  --blue-2: var(--muted);
+  --blue-3: var(--muted);
+  --blue-4: var(--secondary);
+  --blue-5: var(--accent);
+  --blue-6: var(--border);
+  --blue-7: var(--border);
+  --blue-8: var(--ring);
+  --blue-9: var(--primary);
+  --blue-10: var(--primary);
+  --blue-11: var(--primary);
+  --blue-12: var(--primary-foreground);
+
+  --slate-1: var(--background);
+  --slate-2: var(--muted);
+  --slate-3: var(--muted);
+  --slate-4: var(--secondary);
+  --slate-5: var(--accent);
+  --slate-6: var(--border);
+  --slate-7: var(--border);
+  --slate-8: var(--ring);
+  --slate-9: var(--primary);
+  --slate-10: var(--primary);
+  --slate-11: var(--foreground);
+  --slate-12: var(--foreground);
+
+  --basePageBg: var(--card);
+  --baseBase: var(--background);
+  --baseBgSubtle: var(--muted);
+  --baseBg: var(--background);
+  --baseBgHover: var(--secondary);
+  --baseBgActive: var(--accent);
+  --baseLine: var(--border);
+  --baseBorder: var(--border);
+  --baseBorderHover: var(--ring);
+  --baseSolid: var(--primary);
+  --baseSolidHover: var(--primary);
+  --baseText: var(--foreground);
+  --baseTextContrast: var(--foreground);
+
+  --accentBase: var(--background);
+  --accentBgSubtle: var(--muted);
+  --accentBg: var(--secondary);
+  --accentBgHover: var(--accent);
+  --accentBgActive: var(--accent);
+  --accentLine: var(--border);
+  --accentBorder: var(--border);
+  --accentBorderHover: var(--ring);
+  --accentSolid: var(--primary);
+  --accentSolidHover: var(--primary);
+  --accentText: var(--primary);
+  --accentTextContrast: var(--primary-foreground);
+
+  /* Fonts & Radius */
+  --font-body: var(--font-sans), system-ui, sans-serif;
+  --font-mono: var(--font-mono), monospace;
+  --radius-base: var(--radius);
+  --radius-medium: var(--radius);
+  --radius-large: var(--radius);
+}
+
+/* == LAYOUT & CONTAINERS == */
+.editor-only-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+.editor-only-paper {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition:
+    border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.editor-only-paper:focus-within {
+  border-color: var(--ring);
+  box-shadow:
+    0 0 0 2px rgba(0, 87, 118, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* == CUSTOM TOOLBAR == */
+[class*="_toolbarRoot"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background-color: var(--card) !important;
+  border-bottom: 1px solid var(--border) !important;
+  z-index: 10 !important;
+}
+
+.mdxeditor-toolbar-custom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  width: 100%;
+}
+
+.mdx-toolbar-divider {
+  width: 1px;
+  height: 1.25rem;
+  background-color: var(--border);
+  margin: 0 0.5rem;
+  align-self: center;
+}
+
+/* Toolbar Buttons & States */
+[class*="_toolbarRoot"] button,
+[class*="_toolbarRoot"] [role="button"] {
+  border-radius: var(--radius) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  padding: 0.375rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+[class*="_toolbarRoot"] button:hover,
+[class*="_toolbarRoot"] [role="button"]:hover {
+  background-color: var(--secondary) !important;
+  transform: translateY(-0.5px);
+}
+
+[class*="_toolbarRoot"] button:active,
+[class*="_toolbarRoot"] [role="button"]:active {
+  transform: translateY(0px) !important;
+}
+
+[class*="_toolbarRoot"] button[data-state="on"],
+[class*="_toolbarRoot"] [role="button"][data-state="on"] {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
+[class*="_toolbarRoot"] svg {
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  color: var(--foreground) !important;
+}
