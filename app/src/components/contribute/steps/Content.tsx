@@ -1,15 +1,16 @@
-import { StepperActionHeader } from "@/components/contribute/StepperActionHeader";
+import Editor from "../editor/Editor"
+import { StepperActionHeader } from "@/components/contribute/StepperActionHeader"
 
 type PropTypes = {
-    Stepper: any;
-};
+  Stepper: any
+}
 
 export const Content = ({ Stepper }: PropTypes) => {
-    return (
-        <Stepper.Content step="content">
-            <StepperActionHeader title={"Content"} Stepper={Stepper} />
+  return (
+    <Stepper.Content step="content">
+      <StepperActionHeader title={"Content"} Stepper={Stepper} />
 
-            <h2>Guide Body</h2>
-        </Stepper.Content>
-    )
+      <Editor />
+    </Stepper.Content>
+  )
 }
