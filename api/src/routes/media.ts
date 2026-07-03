@@ -22,5 +22,5 @@ export const mediaRouter = new Hono<HonoEnv>()
     // Add to revision history
     const revision = await addMediaRevision(revisionId, mediaAsset.id, supabase)
 
-    return c.json(entry, 201)
+    return c.json({ media: mediaAsset, revision }, 201)
   })
