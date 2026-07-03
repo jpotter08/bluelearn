@@ -1,9 +1,9 @@
-import { z } from "zod"
+import { z } from "zod";
 
-export const knowledgeTypeSchema = z.enum(["theory", "practice"])
-export const guideTypeSchema = z.enum(["canonical", "variant"])
-export const guideStatusSchema = z.enum(["draft", "published", "archived"])
-export const voteDirectionSchema = z.enum(["up", "down"])
+export const knowledgeTypeSchema = z.enum(["theory", "practice"]);
+export const guideTypeSchema = z.enum(["canonical", "variant"]);
+export const guideStatusSchema = z.enum(["draft", "published", "archived"]);
+export const voteDirectionSchema = z.enum(["up", "down"]);
 export const downvoteReasons = [
   "unclear",
   "factually_wrong",
@@ -13,6 +13,6 @@ export const downvoteReasons = [
   "prereq_gap",
   "wrong_level",
   "scope_creep",
-] as const
+] as const;
 
-export const downvoteReasonSchema = z.enum(downvoteReasons)
+export const downvoteReasonSchema = z.enum(downvoteReasons);
