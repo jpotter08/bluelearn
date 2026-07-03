@@ -16,12 +16,12 @@ export async function uploadMediaFile(file: File, userId: string, db: SupabaseCl
 
   // Upload to storage
   const { data: uploadData, error: uploadError } = await db.storage
-    .from('media_assets')
+    .from('media')
     .upload(`uploads/${Date.now()}_${cleanFileName}`, file)
 
   if (uploadError) {
-    console.error('media_assets upload failed:', uploadError.message)
-    return new ServiceError('File upload failed', 500)
+    console.error(uploadError)
+    throw new ServiceError('File upload failed', 500)
   }
 
   // Insert path of uploadData into database
@@ -30,8 +30,6 @@ export async function uploadMediaFile(file: File, userId: string, db: SupabaseCl
     .insert({
       storage_key: uploadData.path,
       uploaded_by: userId,
-      created_at: new Date().toUTCString(),
-      id: uploadData.id
     })
     .select()
     .single()
