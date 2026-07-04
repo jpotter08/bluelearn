@@ -9,7 +9,7 @@ import type { HonoEnv } from "../types"
 import { ServiceError } from '../lib/service-error'
 
 export const prerequisitesRouter = new Hono<HonoEnv>()
-  .post( '/', requireUser, zValidator('json', createPrerequisiteSchema), async (c) => {
+  .post('/', requireUser, zValidator('json', createPrerequisiteSchema), async (c) => {
     const supabase = c.get('supabase')
     const { from_guide_base_id, to_guide_base_id } = c.req.valid('json')
 
@@ -76,7 +76,7 @@ export const todosRouter = new Hono<HonoEnv>()
     return c.json({ todos: data }, 200)
   })
 
-  .post( '/', requireUser, zValidator('json', createTodoPrerequisiteSchema), async (c) => {
+  .post('/', requireUser, zValidator('json', createTodoPrerequisiteSchema), async (c) => {
     const supabase = c.get('supabase')
     const { dependent_guide_base_id, title } = c.req.valid('json')
 
