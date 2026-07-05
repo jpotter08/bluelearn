@@ -133,6 +133,7 @@ export function createGuideRevision(
   return insert("guide_revisions", {
     guide_id: guideId,
     title: "Test Guide",
+    status: "submitted",
     ...overrides,
   });
 }
