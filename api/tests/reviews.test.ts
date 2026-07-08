@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import app from "../src/index";
-import { env, jsonAuth, makeUser } from "./helpers";
+import { env, jsonAuth, makeUser, type Insert } from "./helpers";
 import {
   createReviewCase,
   createReviewPanel,
@@ -14,12 +14,17 @@ import {
 } from "./factories/guides";
 import { expectToMatchSpec } from "./openapi";
 
-async function seedQueueCase(userId: string, title: string) {
+async function seedQueueCase(
+  userId: string,
+  title: string,
+  status: Insert<"review_cases">["status"] = "pending"
+) {
   const base = await createGuideBase();
   const guide = await createGuide(base.id);
   const revision = await createGuideRevision(guide.id, { title });
   const reviewCase = await createReviewCase(userId, {
     case_type: "guide_publish",
+    status,
   });
   const panel = await createReviewPanel(reviewCase.id);
   await createPanelMember(panel.id, userId);
@@ -74,7 +79,7 @@ describe("GET /reviews/queue", () => {
 describe("GET /reviews/cases", () => {
   it("lists review cases", async () => {
     const { userId } = await makeUser();
-    const reviewCase = await seedQueueCase(userId, "Statistics");
+    const reviewCase = await seedQueueCase(userId, "Statistics", "approved");
 
     const res = await app.request("/reviews/cases", {}, env);
 
@@ -118,12 +123,99 @@ describe("POST /reviews/cases/{id}/decisions", () => {
       `/reviews/cases/${reviewCase.id}/decisions`,
       jsonAuth(token, "POST", {
         decision: "approved",
-        justification: "Clear and accurate.",
+        notes: "Clear and accurate.",
       }),
       env
     );
 
     expect(res.status).toBe(201);
     await expectToMatchSpec(res, "POST", "/reviews/cases/{id}/decisions");
+  });
+
+  it("records a rejecting decision with its rubric reasons", async () => {
+    const { token, userId } = await makeUser();
+    const reviewCase = await seedQueueCase(userId, "Statistics");
+
+    const res = await app.request(
+      `/reviews/cases/${reviewCase.id}/decisions`,
+      jsonAuth(token, "POST", {
+        decision: "rejected",
+        notes: "Missing prerequisites.",
+        reasons: ["missing_required_information", "clarity_issue"],
+      }),
+      env
+    );
+
+    expect(res.status).toBe(201);
+    await expectToMatchSpec(res, "POST", "/reviews/cases/{id}/decisions");
+    const body = (await res.json()) as { decision: { reasons: string[] } };
+    expect(body.decision.reasons).toEqual([
+      "missing_required_information",
+      "clarity_issue",
+    ]);
+  });
+
+  it("400s a reject with no rubric reasons", async () => {
+    const { token, userId } = await makeUser();
+    const reviewCase = await seedQueueCase(userId, "Statistics");
+
+    const res = await app.request(
+      `/reviews/cases/${reviewCase.id}/decisions`,
+      jsonAuth(token, "POST", {
+        decision: "rejected",
+        notes: "Missing prerequisites.",
+        reasons: [],
+      }),
+      env
+    );
+
+    expect(res.status).toBe(400);
+  });
+
+  it("drops the case from the caller's queue once decided", async () => {
+    const { token, userId } = await makeUser();
+    const reviewCase = await seedQueueCase(userId, "Statistics");
+
+    await app.request(
+      `/reviews/cases/${reviewCase.id}/decisions`,
+      jsonAuth(token, "POST", { decision: "approved" }),
+      env
+    );
+
+    const res = await app.request(
+      "/reviews/queue",
+      { headers: { Authorization: `Bearer ${token}` } },
+      env
+    );
+    const body = (await res.json()) as { cases: Array<{ id: string }> };
+    expect(body.cases.map((c) => c.id)).not.toContain(reviewCase.id);
+  });
+
+  it("lets a panelist re-vote, revising their decision and reasons", async () => {
+    const { token, userId } = await makeUser();
+    const reviewCase = await seedQueueCase(userId, "Statistics");
+
+    await app.request(
+      `/reviews/cases/${reviewCase.id}/decisions`,
+      jsonAuth(token, "POST", {
+        decision: "rejected",
+        notes: "Missing prerequisites.",
+        reasons: ["clarity_issue"],
+      }),
+      env
+    );
+
+    const res = await app.request(
+      `/reviews/cases/${reviewCase.id}/decisions`,
+      jsonAuth(token, "POST", { decision: "approved", notes: "Fixed." }),
+      env
+    );
+
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as {
+      decision: { decision: string; reasons: string[] };
+    };
+    expect(body.decision.decision).toBe("approved");
+    expect(body.decision.reasons).toEqual([]);
   });
 });

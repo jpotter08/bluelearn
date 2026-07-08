@@ -8,7 +8,7 @@ properties:
     type: string
     enum: [approved, rejected]
     example: approved
-  justification:
+  notes:
     type: [string, "null"]
     example: All the information is correct.
   reasons:
