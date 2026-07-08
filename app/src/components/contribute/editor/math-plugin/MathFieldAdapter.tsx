@@ -1,4 +1,10 @@
-import React, { useEffect, useImperativeHandle, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 export interface MathFieldAdapterRef {
   focus: () => void;
@@ -99,7 +105,7 @@ export const MathFieldAdapter = React.forwardRef<
     }, []);
 
     // Synchronize readOnly state to raw custom element properties
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (mathliveLoaded && internalRef.current) {
         internalRef.current.readOnly = readOnly;
       }
@@ -167,13 +173,22 @@ export const MathFieldAdapter = React.forwardRef<
       );
     }
 
+    const handlePointerDown = () => {
+      if (internalRef.current) {
+        internalRef.current.readOnly = false;
+      }
+      if (onPointerDown) {
+        onPointerDown();
+      }
+    };
+
     return (
       <math-field
         ref={internalRef}
         onFocus={onFocus}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
-        onPointerDown={onPointerDown}
+        onPointerDown={handlePointerDown}
         className={className}
         style={style}
       />
