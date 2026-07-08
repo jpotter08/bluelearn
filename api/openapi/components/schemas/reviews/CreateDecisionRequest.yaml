@@ -4,6 +4,7 @@ description: >
 oneOf:
   - title: Approve
     type: object
+    additionalProperties: false
     properties:
       decision:
         type: string
@@ -14,6 +15,7 @@ oneOf:
     required: [decision, justification]
   - title: Reject
     type: object
+    additionalProperties: false
     properties:
       decision:
         type: string
