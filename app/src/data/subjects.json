@@ -2,6 +2,7 @@
   {
     "slug": "aeronautics",
     "name": "Aeronautics",
+    "status": "In Progress",
     "summary": "Guides covering the fundamentals of flight science and engineering, including aircraft design, aerodynamics, propulsion systems, and flight mechanics.",
     "paths_total": 5,
     "guides_total": 142,
@@ -11,6 +12,7 @@
   {
     "slug": "ai",
     "name": "AI",
+    "status": "Completed",
     "summary": "Guides covering Artificial Intelligence (AI), Machine Learning (ML) and Deep Learning.",
     "paths_total": 5,
     "guides_total": 142,
