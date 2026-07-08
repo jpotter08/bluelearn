@@ -1,4 +1,5 @@
 type: object
+additionalProperties: false
 description: One panel member's vote and written justification.
 properties:
   id:
