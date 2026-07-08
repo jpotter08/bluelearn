@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { InsertBlockMath, InsertInlineMath } from "./math-plugin/index.tsx";
 import MarkdownLinkImageShortcutListener from "./MarkdownLinkImageShortcutListener";
+import H1RestrictionListener from "./H1RestrictionListener.tsx";
 import type { MDXEditorMethods } from "@mdxeditor/editor";
 import {
   Popover,
@@ -34,14 +35,12 @@ import {
 
 interface EditorToolbarProps {
   editorRef: React.RefObject<MDXEditorMethods | null>;
-  markdown: string;
-  setMarkdown: (markdown: string) => void;
+  onH1Attempted: () => void;
 }
 
 export default function EditorToolbar({
   editorRef,
-  markdown,
-  setMarkdown,
+  onH1Attempted,
 }: EditorToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState(false);
@@ -56,7 +55,7 @@ export default function EditorToolbar({
   const blockMathRef = useRef<HTMLSpanElement>(null);
 
   const handleDownload = () => {
-    const content = editorRef.current?.getMarkdown() || markdown;
+    const content = editorRef.current?.getMarkdown() || "";
     const blob = new Blob([content], { type: "text/markdown;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -81,7 +80,6 @@ export default function EditorToolbar({
       const text = event.target?.result as string;
       if (typeof text === "string") {
         editorRef.current?.setMarkdown(text);
-        setMarkdown(text);
       }
     };
     reader.readAsText(file);
@@ -89,7 +87,7 @@ export default function EditorToolbar({
   };
 
   const handleCopy = async () => {
-    const content = editorRef.current?.getMarkdown() || markdown;
+    const content = editorRef.current?.getMarkdown() || "";
     try {
       await navigator.clipboard.writeText(content);
       setCopied(true);
@@ -102,6 +100,7 @@ export default function EditorToolbar({
   return (
     <div className="mdxeditor-toolbar-custom">
       <MarkdownLinkImageShortcutListener />
+      <H1RestrictionListener onH1Attempted={onH1Attempted} />
       <UndoRedo />
       <div className="mdx-toolbar-divider"></div>
       <BoldItalicUnderlineToggles />
