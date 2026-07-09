@@ -123,35 +123,39 @@ function RouteComponent() {
         {/* MAIN */}
         <main className="h-[calc(100vh-70px)] overflow-y-auto px-10 py-8 lg:px-16">
           {/* Breadcrumbs */}
-          <div className="mb-6 flex items-center justify-between">
-            <ul className="flex items-center gap-2 text-xs tracking-[0.08em] text-muted-foreground uppercase">
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <ul className="flex min-w-0 flex-nowrap items-center gap-2 text-xs tracking-[0.08em] text-muted-foreground uppercase">
               {breadcrumbs.map((crumb, idx) => (
                 <li
                   key={`${crumb.label}-${idx}`}
-                  className="mono-micro flex items-center gap-2"
+                  className="mono-micro flex min-w-0 items-center gap-2"
                 >
                   {crumb.path ? (
                     <Link
                       to={crumb.path}
-                      className="flex items-center hover:text-foreground"
+                      className="flex min-w-0 items-center hover:text-foreground"
                       aria-label={crumb.label}
                     >
                       {idx === 0 ? (
-                        <House className="h-3.5 w-3.5" />
+                        <House className="h-3.5 w-3.5 shrink-0" />
                       ) : (
-                        crumb.label
+                        <span className="max-w-[20ch] truncate">
+                          {crumb.label}
+                        </span>
                       )}
                     </Link>
                   ) : (
-                    <span>{crumb.label}</span>
+                    <span className="max-w-[20ch] truncate">{crumb.label}</span>
                   )}
-                  {idx < breadcrumbs.length - 1 && <span>/</span>}
+                  {idx < breadcrumbs.length - 1 && (
+                    <span className="shrink-0">/</span>
+                  )}
                 </li>
               ))}
             </ul>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <Button variant="default" size="icon">
                 <Pencil className="h-4 w-4" />
               </Button>
