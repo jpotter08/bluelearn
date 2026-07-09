@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 
-import type { HydratedPath } from "@/types/paths";
+import type { HydratedObjective } from "@/types/objectives";
 
 import {
   Card,
@@ -14,7 +14,7 @@ import { FooterStats } from "@/components/cards/FooterStats";
 
 import { Route as LearningPathRoute } from "@/routes/paths.$slug";
 
-type PathProp = HydratedPath & {
+type PathProp = HydratedObjective & {
   stats?: Array<{ label: string; data: number }>;
   actionBtns?: React.ReactNode;
 };

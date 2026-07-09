@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import type { HydratedPath, Level } from "@/types/paths";
+import type { HydratedObjective, Level } from "@/types/objectives";
 
 import { Separator } from "@/components/ui/separator";
 import { PathCard } from "@/components/cards/PathCard";
 import { GuideCard } from "@/components/cards/GuideCard";
 
-import { hydratePaths } from "@/lib/getData";
+import { hydrateObjectives } from "@/lib/getData";
 
 import objectives from "@/data/objectives.json";
 import guides from "@/data/guides.json";
@@ -19,16 +19,21 @@ export const Route = createFileRoute("/subjects/$slug")({
 function SubjectPage() {
   const { slug } = Route.useParams();
 
-  const hydratedPaths: Array<HydratedPath> = hydratePaths(guides, objectives);
+  const hydratedObjectives: Array<HydratedObjective> = hydrateObjectives(
+    guides,
+    objectives
+  );
 
-  const allGuides = hydratedPaths.flatMap((p) => p.levels.map((l) => l.guide));
+  const allGuides = hydratedObjectives.flatMap((p) =>
+    p.levels.map((l) => l.guide)
+  );
 
   return (
     <div className="mx-auto max-w-[1280px] border-x bg-background">
       <section className="border-b px-8 py-8 lg:px-16">
         <div className="mb-6">
           <h1 className="data-label text-[14px] tracking-[0.08em] text-muted-foreground uppercase">
-            {slug} Learning Paths ({hydratedPaths.length})
+            {slug} Learning Paths ({hydratedObjectives.length})
           </h1>
         </div>
 
@@ -36,7 +41,7 @@ function SubjectPage() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {hydratedPaths.map((path: HydratedPath) => {
+          {hydratedObjectives.map((path: HydratedObjective) => {
             const p = {
               ...path,
               stats: [
@@ -60,7 +65,7 @@ function SubjectPage() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {hydratedPaths[0].levels.map((level: Level) => {
+          {hydratedObjectives[0].levels.map((level: Level) => {
             const g = {
               ...level.guide,
               stats: [{ label: "Duration", data: level.guide.duration }],

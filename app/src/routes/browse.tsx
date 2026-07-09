@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 
-import type { HydratedPath } from "@/types/paths";
+import type { HydratedObjective } from "@/types/objectives";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { PathCard } from "@/components/cards/PathCard";
 
-import { hydratePaths } from "@/lib/getData";
+import { hydrateObjectives } from "@/lib/getData";
 
 import objectives from "@/data/objectives.json";
 import guides from "@/data/guides.json";
@@ -21,10 +21,13 @@ export const Route = createFileRoute("/browse")({
 });
 
 function RouteComponent() {
-  const hydratedPaths: Array<HydratedPath> = hydratePaths(guides, objectives);
+  const hydratedObjectives: Array<HydratedObjective> = hydrateObjectives(
+    guides,
+    objectives
+  );
 
-  const allGuides = hydratedPaths
-    .flatMap((p) => p.levels.map((l) => l.guide))
+  const allGuides = hydratedObjectives
+    .flatMap((o) => o.levels.map((l) => l.guide))
     .slice(0, 6);
 
   const sectionHeadingCommonClassNames =
@@ -72,15 +75,15 @@ function RouteComponent() {
         <CollapsibleSection
           title={
             <h2 className={`${sectionHeadingCommonClassNames}`}>
-              Learning Paths ({objectives.length})
+              Learning Objectives ({objectives.length})
             </h2>
           }
           defaultOpen={true}
         >
           <Separator className="mb-8 h-[0.5px]! bg-border" />
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {hydratedPaths.map((path: HydratedPath) => (
-              <PathCard key={path.slug} path={path} />
+            {hydratedObjectives.map((objective: HydratedObjective) => (
+              <PathCard key={objective.slug} path={objective} />
             ))}
           </div>
           <div className="mt-8 mb-4">

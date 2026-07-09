@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import type { HydratedPath } from "@/types/paths";
+import type { HydratedObjective } from "@/types/objectives";
 
 import { Separator } from "@/components/ui/separator";
 import { PathCard } from "@/components/cards/PathCard";
 
-import { hydratePaths } from "@/lib/getData";
+import { hydrateObjectives } from "@/lib/getData";
 
 import guides from "@/data/guides.json";
 import objectives from "@/data/objectives.json";
@@ -13,7 +13,10 @@ import objectives from "@/data/objectives.json";
 export const Route = createFileRoute("/paths/")({ component: RouteComponent });
 
 function RouteComponent() {
-  const hydratedPaths: Array<HydratedPath> = hydratePaths(guides, objectives);
+  const hydratedObjectives: Array<HydratedObjective> = hydrateObjectives(
+    guides,
+    objectives
+  );
 
   return (
     <div className="mx-auto max-w-[1280px] border-x bg-background">
@@ -28,7 +31,7 @@ function RouteComponent() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {hydratedPaths.map((path: HydratedPath) => {
+          {hydratedObjectives.map((path: HydratedObjective) => {
             const p = {
               ...path,
               stats: [

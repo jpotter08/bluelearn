@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import type { HydratedPath } from "@/types/paths";
+import type { HydratedObjective } from "@/types/objectives";
 import type { Guide } from "@/types/guides";
 import type { Subject } from "@/types/subjects";
 
@@ -14,14 +14,17 @@ import guides from "@/data/guides.json";
 import objectives from "@/data/objectives.json";
 import subjects from "@/data/subjects.json";
 
-import { hydratePaths } from "@/lib/getData";
+import { hydrateObjectives } from "@/lib/getData";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/review/")({ component: RouteComponent });
 
 function RouteComponent() {
-  const hydratedPaths: Array<HydratedPath> = hydratePaths(guides, objectives);
-  const allGuides: Array<Guide> = hydratedPaths.flatMap((p) =>
+  const hydratedObjectives: Array<HydratedObjective> = hydrateObjectives(
+    guides,
+    objectives
+  );
+  const allGuides: Array<Guide> = hydratedObjectives.flatMap((p) =>
     p.levels.map((l) => l.guide)
   );
 
@@ -37,9 +40,9 @@ function RouteComponent() {
       content: <ReviewGrid type="guides" data={allGuides} />,
     },
     {
-      id: "paths",
-      label: "Learning Paths",
-      content: <ReviewGrid type="paths" data={hydratedPaths} />,
+      id: "objectives",
+      label: "Learning Objectives",
+      content: <ReviewGrid type="objectives" data={hydratedObjectives} />,
     },
   ];
 
@@ -66,14 +69,14 @@ type ReviewGridProps = {
 };
 
 const ReviewGrid = ({ type, data }: ReviewGridProps) => {
-  if (type == "paths") {
+  if (type == "objectives") {
     return (
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {data.map((path: HydratedPath) => {
-          const p = {
-            ...path,
+        {data.map((objective: HydratedObjective) => {
+          const o = {
+            ...objective,
           };
-          return <PathCard key={p.slug} path={p} />;
+          return <PathCard key={o.slug} path={o} />;
         })}
       </div>
     );

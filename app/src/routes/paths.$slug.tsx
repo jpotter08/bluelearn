@@ -1,11 +1,11 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
-import type { HydratedPath, Level } from "@/types/paths";
+import type { HydratedObjective, Level } from "@/types/objectives";
 
 import { Separator } from "@/components/ui/separator";
 import { GuideCard } from "@/components/cards/GuideCard";
 
-import { getPathBySlug, hydratePaths } from "@/lib/getData";
+import { getPathBySlug, hydrateObjectives } from "@/lib/getData";
 import { formatDuration } from "@/lib/guideUtils";
 
 import objectives from "@/data/objectives.json";
@@ -22,15 +22,18 @@ function PathPage() {
     throw notFound;
   }
 
-  const hydratedPaths: Array<HydratedPath> = hydratePaths(guides, [pathData]);
+  const hydratedObjectives: Array<HydratedObjective> = hydrateObjectives(
+    guides,
+    [pathData]
+  );
 
   return (
     <div className="mx-auto max-w-[1280px] border-x bg-background">
       <section className="border-b px-8 py-8 lg:px-16">
         <div className="mb-6">
           <p className="data-label text-[11px] tracking-[0.08em] text-muted-foreground uppercase">
-            Learning Path: {slug} ({hydratedPaths[0].levels.length} levels |{" "}
-            {formatDuration(hydratedPaths[0].duration)} total)
+            Learning Objectives: {slug} ({hydratedObjectives[0].levels.length}{" "}
+            levels | {formatDuration(hydratedObjectives[0].duration)} total)
           </p>
         </div>
 
@@ -38,7 +41,7 @@ function PathPage() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {hydratedPaths[0].levels.map((level: Level) => {
+          {hydratedObjectives[0].levels.map((level: Level) => {
             const g = {
               ...level.guide,
               actionBtns: (

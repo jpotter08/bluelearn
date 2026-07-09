@@ -1,7 +1,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ChevronRight, Search, SlidersHorizontal, X } from "lucide-react";
 
-import type { HydratedPath } from "@/types/paths";
+import type { HydratedObjective } from "@/types/objectives";
 
 import { Route as SubjectRoute } from "@/routes/subjects.$slug";
 
@@ -15,12 +15,15 @@ import subjects from "@/data/subjects.json";
 import objectives from "@/data/objectives.json";
 import guides from "@/data/guides.json";
 
-import { hydratePaths } from "@/lib/getData";
+import { hydrateObjectives } from "@/lib/getData";
 
 export const Route = createFileRoute("/")({ component: RouteComponent });
 
 function RouteComponent() {
-  const hydratedPaths: Array<HydratedPath> = hydratePaths(guides, objectives);
+  const hydratedObjectives: Array<HydratedObjective> = hydrateObjectives(
+    guides,
+    objectives
+  );
 
   return (
     <div className="mx-auto max-w-[1280px] border-x bg-background">
@@ -132,8 +135,8 @@ function RouteComponent() {
       </section>
 
       {/* Featured Section */}
-      <FeaturedRow paths={hydratedPaths} type={"Recently Added"} />
-      <FeaturedRow paths={hydratedPaths} type={"Popular This Week"} />
+      <FeaturedRow paths={hydratedObjectives} type={"Recently Added"} />
+      <FeaturedRow paths={hydratedObjectives} type={"Popular This Week"} />
     </div>
   );
 }
