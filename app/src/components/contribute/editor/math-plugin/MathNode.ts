@@ -52,6 +52,7 @@ export class MathNode extends DecoratorNode<unknown> {
   createDOM(_config: EditorConfig): HTMLElement {
     const dom = document.createElement(this.__inline ? "span" : "div");
     dom.style.display = this.__inline ? "inline-block" : "block";
+    dom.contentEditable = "false";
     return dom;
   }
 

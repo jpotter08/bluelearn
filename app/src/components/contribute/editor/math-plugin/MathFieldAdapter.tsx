@@ -191,6 +191,7 @@ export const MathFieldAdapter = React.forwardRef<
         onPointerDown={handlePointerDown}
         className={className}
         style={style}
+        contentEditable={readOnly ? "false" : "true"}
       />
     );
   }
