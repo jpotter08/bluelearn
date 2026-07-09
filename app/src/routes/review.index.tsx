@@ -5,7 +5,7 @@ import type { Guide } from "@/types/guides";
 import type { Subject } from "@/types/subjects";
 
 import { Separator } from "@/components/ui/separator";
-import { PathCard } from "@/components/cards/ObjectiveCard";
+import { ObjectiveCard } from "@/components/cards/ObjectiveCard";
 import { GuideCard } from "@/components/cards/GuideCard";
 import { CustomTabs } from "@/components/Tabs";
 import { SubjectCard } from "@/components/cards/SubjectCard";
@@ -76,7 +76,7 @@ const ReviewGrid = ({ type, data }: ReviewGridProps) => {
           const o = {
             ...objective,
           };
-          return <PathCard key={o.slug} path={o} />;
+          return <ObjectiveCard key={o.slug} objective={o} />;
         })}
       </div>
     );

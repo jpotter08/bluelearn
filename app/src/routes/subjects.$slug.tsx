@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type { HydratedObjective, Level } from "@/types/objectives";
 
 import { Separator } from "@/components/ui/separator";
-import { PathCard } from "@/components/cards/ObjectiveCard";
+import { ObjectiveCard } from "@/components/cards/ObjectiveCard";
 import { GuideCard } from "@/components/cards/GuideCard";
 
 import { hydrateObjectives } from "@/lib/getData";
@@ -33,7 +33,7 @@ function SubjectPage() {
       <section className="border-b px-8 py-8 lg:px-16">
         <div className="mb-6">
           <h1 className="data-label text-[14px] tracking-[0.08em] text-muted-foreground uppercase">
-            {slug} Learning Paths ({hydratedObjectives.length})
+            {slug} Learning Objectives ({hydratedObjectives.length})
           </h1>
         </div>
 
@@ -41,15 +41,15 @@ function SubjectPage() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {hydratedObjectives.map((path: HydratedObjective) => {
+          {hydratedObjectives.map((objective: HydratedObjective) => {
             const p = {
-              ...path,
+              ...objective,
               stats: [
-                { label: "Duration", data: path.duration },
-                { label: "Guides", data: path.levels.length },
+                { label: "Duration", data: objective.duration },
+                { label: "Guides", data: objective.levels.length },
               ],
             };
-            return <PathCard key={p.slug} path={p} />;
+            return <ObjectiveCard key={p.slug} objective={p} />;
           })}
         </div>
       </section>

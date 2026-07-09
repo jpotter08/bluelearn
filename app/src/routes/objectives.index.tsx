@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type { HydratedObjective } from "@/types/objectives";
 
 import { Separator } from "@/components/ui/separator";
-import { PathCard } from "@/components/cards/ObjectiveCard";
+import { ObjectiveCard } from "@/components/cards/ObjectiveCard";
 
 import { hydrateObjectives } from "@/lib/getData";
 
@@ -41,7 +41,7 @@ function RouteComponent() {
                 { label: "Guides", data: objective.levels.length },
               ],
             };
-            return <PathCard key={p.slug} path={p} />;
+            return <ObjectiveCard key={p.slug} objective={p} />;
           })}
         </div>
       </section>

@@ -1,14 +1,14 @@
 import type { HydratedObjective } from "@/types/objectives";
 
 import { Separator } from "@/components/ui/separator";
-import { PathCard } from "@/components/cards/ObjectiveCard";
+import { ObjectiveCard } from "@/components/cards/ObjectiveCard";
 
 type PropTypes = {
-  paths: Array<HydratedObjective>;
+  objectives: Array<HydratedObjective>;
   type: string;
 };
 
-export const FeaturedRow = ({ paths, type }: PropTypes) => {
+export const FeaturedRow = ({ objectives, type }: PropTypes) => {
   return (
     <section className="border-b px-8 py-10 lg:px-16">
       {/* Header */}
@@ -22,19 +22,19 @@ export const FeaturedRow = ({ paths, type }: PropTypes) => {
 
       <Separator className="mb-4 bg-border" />
 
-      {/* Paths */}
+      {/* Objectives */}
       <div className="flex scrollbar-thin gap-6 overflow-x-auto p-2">
-        {paths.map((path: HydratedObjective) => {
-          const p = {
-            ...path,
+        {objectives.map((objective: HydratedObjective) => {
+          const o = {
+            ...objective,
             stats: [
-              { label: "Duration", data: path.duration },
-              { label: "Guides", data: path.levels.length },
+              { label: "Duration", data: objective.duration },
+              { label: "Guides", data: objective.levels.length },
             ],
           };
           return (
-            <div key={path.slug} className="w-[550px] shrink-0">
-              <PathCard key={p.slug} path={p} />;
+            <div key={objective.slug} className="w-[550px] shrink-0">
+              <ObjectiveCard key={o.slug} objective={o} />;
             </div>
           );
         })}

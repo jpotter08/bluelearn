@@ -135,8 +135,8 @@ function RouteComponent() {
       </section>
 
       {/* Featured Section */}
-      <FeaturedRow paths={hydratedObjectives} type={"Recently Added"} />
-      <FeaturedRow paths={hydratedObjectives} type={"Popular This Week"} />
+      <FeaturedRow objectives={hydratedObjectives} type={"Recently Added"} />
+      <FeaturedRow objectives={hydratedObjectives} type={"Popular This Week"} />
     </div>
   );
 }

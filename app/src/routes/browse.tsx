@@ -6,7 +6,7 @@ import type { HydratedObjective } from "@/types/objectives";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { PathCard } from "@/components/cards/ObjectiveCard";
+import { ObjectiveCard } from "@/components/cards/ObjectiveCard";
 
 import { hydrateObjectives } from "@/lib/getData";
 
@@ -70,7 +70,7 @@ function RouteComponent() {
         </div>
       </section>
 
-      {/* Paths */}
+      {/* Objectives */}
       <section className="px-8 py-10 lg:px-16">
         <CollapsibleSection
           title={
@@ -83,7 +83,7 @@ function RouteComponent() {
           <Separator className="mb-8 h-[0.5px]! bg-border" />
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {hydratedObjectives.map((objective: HydratedObjective) => (
-              <PathCard key={objective.slug} path={objective} />
+              <ObjectiveCard key={objective.slug} objective={objective} />
             ))}
           </div>
           <div className="mt-8 mb-4">

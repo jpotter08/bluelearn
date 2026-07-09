@@ -12,19 +12,19 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { FooterStats } from "@/components/cards/FooterStats";
 
-import { Route as LearningPathRoute } from "@/routes/objectives.$slug";
+import { Route as LearningObjectiveRoute } from "@/routes/objectives.$slug";
 
-type PathProp = HydratedObjective & {
+type ObjectiveProp = HydratedObjective & {
   stats?: Array<{ label: string; data: number }>;
   actionBtns?: React.ReactNode;
 };
 
 type PropTypes = {
-  path: PathProp;
+  objective: ObjectiveProp;
 };
 
-export const PathCard = ({ path }: PropTypes) => {
-  const previewLevels = path.levels.slice(0, 3);
+export const ObjectiveCard = ({ objective }: PropTypes) => {
+  const previewLevels = objective.levels.slice(0, 3);
 
   return (
     <Card className="group flex flex-col justify-between rounded-md bg-background shadow-none transition-colors hover:bg-muted">
@@ -32,31 +32,31 @@ export const PathCard = ({ path }: PropTypes) => {
       <CardHeader className="relative p-4">
         <div className="flex items-center justify-between">
           <p className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
-            Path
+            Objective
           </p>
-          {path.status && (
+          {objective.status && (
             <Badge
               variant="outline"
               className="mono-micro rounded-full border border-badge-border bg-badge tracking-[0.08em] text-badge-foreground"
             >
-              {path.status}
+              {objective.status}
             </Badge>
           )}
         </div>
 
-        <Link to={LearningPathRoute.to} params={{ slug: path.slug }}>
+        <Link to={LearningObjectiveRoute.to} params={{ slug: objective.slug }}>
           <h3 className="line-clamp-2 text-xl font-semibold tracking-tight">
-            {path.title}
+            {objective.title}
           </h3>
         </Link>
 
         <p className="max-w-2xl text-sm text-muted-foreground">
-          {path.summary}
+          {objective.summary}
         </p>
 
         <div className="flex items-center justify-between text-sm">
           <p className="font-mono text-[11px] tracking-[0.08em] text-muted-foreground uppercase">
-            @{path.curator} | {path.created_at}
+            @{objective.curator} | {objective.created_at}
           </p>
         </div>
       </CardHeader>
@@ -80,12 +80,12 @@ export const PathCard = ({ path }: PropTypes) => {
               </div>
 
               {(index < previewLevels.length - 1 ||
-                path.levels.length >= 3) && (
+                objective.levels.length >= 3) && (
                 <ArrowRight className="h-5 w-5 shrink-0" />
               )}
               {index >= previewLevels.length - 1 && (
                 <div className="text-center">
-                  <p>{path.levels.length - 3}</p>
+                  <p>{objective.levels.length - 3}</p>
 
                   <p className="text-xs text-muted-foreground">more levels</p>
                 </div>
@@ -96,13 +96,13 @@ export const PathCard = ({ path }: PropTypes) => {
       </CardContent>
 
       {/* Footer */}
-      {(path.stats || path.actionBtns) && (
+      {(objective.stats || objective.actionBtns) && (
         <CardFooter className="grid grid-cols-2 border-t p-0 lg:grid-cols-4">
-          {path.stats?.map((g: { label: string; data: number }) => {
+          {objective.stats?.map((g: { label: string; data: number }) => {
             return <FooterStats label={g.label} data={g.data} />;
           })}
 
-          {path.actionBtns}
+          {objective.actionBtns}
         </CardFooter>
       )}
     </Card>
