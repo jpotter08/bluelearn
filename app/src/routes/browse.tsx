@@ -10,7 +10,7 @@ import { PathCard } from "@/components/cards/PathCard";
 
 import { hydratePaths } from "@/lib/getData";
 
-import paths from "@/data/paths.json";
+import paths from "@/data/objectives.json";
 import guides from "@/data/guides.json";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { Pagination } from "@/components/Pagination";

@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { FeaturedRow } from "@/components/FeaturedRow";
 
 import subjects from "@/data/subjects.json";
-import paths from "@/data/paths.json";
+import paths from "@/data/objectives.json";
 import guides from "@/data/guides.json";
 
 import { hydratePaths } from "@/lib/getData";

@@ -11,7 +11,7 @@ import { CustomTabs } from "@/components/Tabs";
 import { SubjectCard } from "@/components/cards/SubjectCard";
 
 import guides from "@/data/guides.json";
-import paths from "@/data/paths.json";
+import paths from "@/data/objectives.json";
 import subjects from "@/data/subjects.json";
 
 import { hydratePaths } from "@/lib/getData";

@@ -8,7 +8,7 @@ import { GuideCard } from "@/components/cards/GuideCard";
 import { getPathBySlug, hydratePaths } from "@/lib/getData";
 import { formatDuration } from "@/lib/guideUtils";
 
-import paths from "@/data/paths.json";
+import paths from "@/data/objectives.json";
 import guides from "@/data/guides.json";
 import { Button } from "@/components/ui/button";
 
