@@ -121,7 +121,7 @@ function RouteComponent() {
         </aside>
 
         {/* MAIN */}
-        <main className="h-[calc(100vh-70px)] overflow-y-auto px-10 py-8 lg:px-16">
+        <main className="h-[calc(100vh-70px)] min-w-0 overflow-y-auto px-10 py-8 lg:px-16">
           {/* Breadcrumbs */}
           <div className="mb-6 flex items-center justify-between gap-4">
             <ul className="flex min-w-0 flex-nowrap items-center gap-2 text-xs tracking-[0.08em] text-muted-foreground uppercase">
