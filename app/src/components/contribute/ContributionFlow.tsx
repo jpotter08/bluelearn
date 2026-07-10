@@ -6,7 +6,6 @@ import type { ContributionType } from "@/types/contributions";
 import { flows, typeStep } from "@/lib/contributionFlow";
 
 import { SelectType } from "@/components/contribute/steps/SelectType";
-import { SubjectDetails } from "@/components/contribute/steps/SubjectDetails";
 import { GuideDetails } from "@/components/contribute/steps/GuideDetails";
 import { VariantDetails } from "@/components/contribute/steps/VariantDetails";
 import { Content } from "@/components/contribute/steps/Content";
@@ -63,9 +62,6 @@ function Inner({
       let nextStep = "objective-details";
 
       switch (value) {
-        case "subject":
-          nextStep = "subject-details";
-          break;
         case "guide":
           nextStep = "guide-details";
           break;
@@ -105,7 +101,6 @@ function Inner({
       <div className="flex min-w-0 flex-1 flex-col">
         <SelectType pickType={pickType} type={type} Stepper={Stepper} />
 
-        <SubjectDetails Stepper={Stepper} />
         <GuideDetails Stepper={Stepper} />
         <VariantDetails Stepper={Stepper} />
         <ObjectiveDetails Stepper={Stepper} />

@@ -1,4 +1,4 @@
-export type ContributionType = "subject" | "guide" | "variant" | "objective";
+export type ContributionType = "guide" | "variant" | "objective";
 
 export type ContributionDraft = {
   type?: ContributionType;
