@@ -55,7 +55,10 @@ function RouteComponent() {
       <section className="grid grid-cols-[320px_1fr] border-b">
         <Sidebar>
           {/* Prerequisites */}
-          <CollapsibleSection title={<p className="ml-auto">Prerequisites</p>}>
+          <CollapsibleSection
+            title={<p className="ml-auto">Prerequisites</p>}
+            defaultOpen={true}
+          >
             <ul className="space-y-2">
               {hydratedGuide.prerequisites.map((prereq: GuideReference) => (
                 <li
@@ -86,6 +89,7 @@ function RouteComponent() {
           {/* TOC */}
           <CollapsibleSection
             title={<p className="ml-auto">Table of Contents</p>}
+            defaultOpen={true}
           >
             <ul className="space-y-2">
               {headings.map((h, idx) => (
@@ -110,7 +114,10 @@ function RouteComponent() {
           </CollapsibleSection>
 
           {/* Variants */}
-          <CollapsibleSection title={<p className="ml-auto">Variants</p>}>
+          <CollapsibleSection
+            title={<p className="ml-auto">Variants</p>}
+            defaultOpen={true}
+          >
             <ul className="space-y-2"></ul>
           </CollapsibleSection>
         </Sidebar>
