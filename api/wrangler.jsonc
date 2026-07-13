@@ -4,4 +4,10 @@
   "compatibility_date": "2026-05-10",
   "compatibility_flags": ["nodejs_compat"],
   "triggers": { "crons": ["* * * * *"] },
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT_KV",
+      "id": "REPLACE_WITH_REAL_KV_NAMESPACE_ID",
+    },
+  ],
 }
