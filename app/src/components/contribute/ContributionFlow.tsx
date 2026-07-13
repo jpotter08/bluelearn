@@ -34,22 +34,15 @@ export default function ContributionFlow() {
     useState<ObjectiveContribution>({
       title: "",
       summary: "",
-      selectedSlugs: [
+      targets: [
         "arithmetic-introduction",
         "algebra-how-to-express-equations",
         "calculus-introduction",
         "vectors-introduction",
         "mechanics-how-to-apply-newtons-laws",
       ],
-      subObjectives: [],
-    });
-
-  const [objectiveContData, setObjectiveContData] =
-    useState<ObjectiveContribution>({
-      title: "",
-      summary: "",
-      target: [],
       featured: "",
+      subObjectives: [],
     });
 
   const StepperInstance = useMemo(() => {
@@ -162,7 +155,6 @@ function Inner({
         />
 
         <Content Stepper={Stepper} />
-        <SelectObjectiveGuides Stepper={Stepper} />
         <OrderObjectiveGuides
           Stepper={Stepper}
           objectiveContData={objectiveContData}

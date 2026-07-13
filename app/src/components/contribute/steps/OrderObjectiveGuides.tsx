@@ -141,7 +141,7 @@ export const OrderObjectiveGuides = ({
   setObjectiveContData,
 }: PropTypes) => {
   const [targetSlug, setTargetSlug] = useState<string>(
-    objectiveContData.selectedSlugs[0] || ""
+    objectiveContData.targets[0] || ""
   );
   const [curatedSequence, setCuratedSequence] = useState<Array<string>>([]);
   const [isVariantAlertOpen, setIsVariantAlertOpen] = useState(false);
@@ -175,7 +175,7 @@ export const OrderObjectiveGuides = ({
   const isCustomSequence = Object.keys(violations).length > 0;
 
   const selectedGuidesList = guidesData.filter((g) =>
-    objectiveContData.selectedSlugs.includes(g.slug)
+    objectiveContData.targets.includes(g.slug)
   );
 
   const targetGuide = targetSlug ? guidesMap.get(targetSlug) : undefined;
@@ -206,6 +206,17 @@ export const OrderObjectiveGuides = ({
       };
     });
   };
+
+  // Sync targetSlug if the list of targets changes and targetSlug becomes invalid
+  useEffect(() => {
+    if (objectiveContData.targets.length > 0) {
+      if (!objectiveContData.targets.includes(targetSlug)) {
+        setTargetSlug(objectiveContData.targets[0] || "");
+      }
+    } else {
+      setTargetSlug("");
+    }
+  }, [objectiveContData.targets, targetSlug]);
 
   // Sync initial curated sequence when target guide changes
   useEffect(() => {
