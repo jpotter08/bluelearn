@@ -15,7 +15,11 @@ The schema deliberately keeps the database source of truth small:
 - Store governance records (votes, review cases, panels, decisions) as ground truth.
 - Do not store values that can be derived from the graph.
 
+
+
 ## Tables
+
+
 
 ### `profiles`
 
@@ -58,6 +62,9 @@ Status enum values are:
 - `draft` — no guide has been published yet; `canonical_guide_id` is null.
 - `published` — live; `canonical_guide_id` points at a published guide.
 - `archived` — deliberately retired; `canonical_guide_id` is left untouched so the last canonical content stays retrievable.
+- 
+
+
 
 ### `guides`
 
@@ -198,19 +205,23 @@ Append-only version history plus the objective's editorial metadata, mirroring `
 - `updated_at`: last edit time, maintained by a trigger. A draft is edited in place, so this advances during the draft phase and freezes once the revision is published. 
 - `published_at`: when this revision went live, null until then.
 
-Submitting a revision is a direct publish: in one transaction it flips `status = draft → published`, stamps `published_at`, freezes the revision's projected edges, and points `objectives.current_revision_id` at it (setting `objectives.status = published`, and freezing the slug on first publish). Whether a revision is currently live is read from `objectives.current_revision_id`, not from its status.
+Submitting a revision is a direct publish: in one transaction it flips `status = draft → published`, stamps `published_at`, freezes the revision's projected edges and linear order, and points `objectives.current_revision_id` at it (setting `objectives.status = published`, and freezing the slug on first publish). Whether a revision is currently live is read from `objectives.current_revision_id`, not from its status.
 
 ### `objective_revision_nodes`
 
 The curriculum: every topic in this revision's target closure, which of them are the objective's goals, and which the curator skipped. A row exists for every closure topic; `is_included` distinguishes a kept topic from a skipped one (a soft hide, not a delete), so the editor can still list a skipped topic as a re-includable candidate and edge projection can bridge across it. An absent row means the topic was never in the closure at all.
 
+- `id`: primary key for the node, so other tables (notably `objective_revision_node_orders`) can reference a node by a single id.
 - `revision_id`: FK to `objective_revisions`.
 - `guide_base_id`: the topic (FK to `guide_bases`).
 - `guide_id`: the guide variant the curator chose for this topic (FK to `guides`). The variant is pinned, but its content is read live through `guides.current_revision_id` (the objective shows the up-to-date guide, not a frozen body).
 - `is_target`: boolean, default `false`. `true` marks this node as one of the objective's goal topics (an endpoint the curriculum was built to reach). A revision may have several targets (an objective can climb toward Machine Learning *and* Statistics at once).
 - `is_included`: boolean, default `true`. `false` means the curator skipped this topic: the row stays as a re-includable candidate but the topic is dropped from the published curriculum and bridged over by edge projection. Skipping is a soft hide; only included rows reach the published objective.
 - `note`: optional curator annotation for this node within the objective.
-- Primary key `(revision_id, guide_base_id)`, so a topic appears at most once per revision.
+- Primary key `id`. `(revision_id, guide_base_id)` is a unique constraint, so a topic still appears at most once per revision.
+- 
+
+
 
 ### `objective_revision_edges`
 
@@ -221,7 +232,21 @@ The projected prerequisite edges among included nodes, computed once at publish 
 - `to_guide_base_id`: target endpoint (FK to `guide_bases`), an included node of this revision.
 - Primary key `(revision_id, from_guide_base_id, to_guide_base_id)`.
 
-These edges are derived from the global `guide_edges` graph, never hand-authored: at publish, the global prerequisite graph is projected onto the included (`is_included = true`) node set, bridging skipped prerequisites (if `A → Trig → C` and Trig is skipped, the projection stores `A → C`). The projection is computed by `project_objective_edges(revision_id)`. A draft computes it live on every read for the editor's hide-skipped view; only at publish is the result frozen into this table. (The editor's show-skipped view instead uses the raw prerequisite edges among the nodes, read straight from `guide_edges` and never stored.) They are a frozen *view* of the canonical graph, not a competing prerequisite authority (see [Objectives as frozen projections](#objectives-as-frozen-projections) for why this does not violate the one-global-DAG rule).
+These edges are derived from the global `guide_edges` graph, never hand-authored: at publish, the global prerequisite graph is projected onto the included (`is_included = true`) node set, bridging skipped prerequisites (if `A → Trig → C` and Trig is skipped, the projection stores `A → C`). They are a frozen *view* of the canonical graph, not a competing prerequisite authority (see [Objectives as frozen projections](#objectives-as-frozen-projections)). These edges power the objective's graph view, which is the secondary view. The primary view is the authored linear order in `objective_revision_node_orders` below.
+
+
+
+### `objective_revision_node_orders`
+
+The objective's linear reading order, authored per target (sub-objective) and the objective's primary view. It holds one row per placed node per target, so a topic shared across targets can sit at a different position in each target's sequence. Rows exist only for included nodes.
+
+- `revision_id`: FK to `objective_revisions`.
+- `target_node_id`: the target node whose sequence this row belongs to (FK to `objective_revision_nodes`).
+- `node_id`: the node placed in the sequence (FK to `objective_revision_nodes`).
+- `position`: integer slot in the target's sequence, starting at 0.
+- Primary key `(revision_id, target_node_id, node_id)`.
+
+
 
 ### `subjects`
 
@@ -233,6 +258,8 @@ Subject tags, such as Math, Physics, or Game Development. Subjects are not conta
 - `summary`: optional short description for subject listings and the subject header. Nullable; subjects have no revision table, so it lives on the row.
 - `creator_id`: FK to `profiles.id` (the user who created the subject).
 - `created_at`: subject creation time.
+
+
 
 ### `guide_revision_subjects`
 
@@ -248,12 +275,16 @@ Guide base: Vectors
 Subjects: Math, Physics, Game Development
 ```
 
+
+
 ### `objective_revision_subjects`
 
 Many-to-many join table between objective revisions and subjects, mirroring `guide_revision_subjects`.
 
 - `objective_revision_id`: the tagged objective revision.
 - `subject_id`: the subject tag applied to it. The pair `(objective_revision_id, subject_id)` is the primary key, so a revision cannot carry the same tag twice.
+
+
 
 ### `votes`
 
@@ -314,6 +345,8 @@ The manifest of object-storage assets, so a purge can delete media reliably inst
 
 - `revision_id`: FK to `guide_revisions`.
 - `asset_id`: FK to `media_assets`. The pair `(revision_id, asset_id)` is the primary key.
+
+
 
 ### `review_cases`, `review_panels`, and `review_decisions`
 
@@ -478,6 +511,8 @@ Each level still keeps its own `status` because it answers a question only that 
 - `guides.status` — is **this method/alternative** live, while its base and siblings stay published? You can archive one guide without touching the base.
 - `guide_revisions.status` — is **this specific draft** still being written or already handed to review? This is per-revision and has no meaning at the node level.
 
+
+
 ### Content removal
 
 An `action` field picks the path in the `content_holds` table: `hidden` (reversible) or `purge` (irreversible). Content only lives on `guide_revisions`, so every actual content destruction lands there (`guides` and `guide_bases` hold no `body` to destroy).
@@ -640,10 +675,6 @@ Reachability is computed by checking whether every transitive prerequisite exist
 #### Walkthroughs
 
 Most walkthroughs should be generated on demand by picking a target guide base and computing its transitive prerequisite DAG. Saved or user-curated walkthroughs are intentionally left for a later migration because their sharing, attribution, and dispute model is still open in `docs/open-questions.md`.
-
-#### Objective levels
-
-An objective stores no per-node level. Ordering is derived at render time by topological layering over the revision's frozen `objective_revision_edges`: each node's level is its longest projected-prerequisite path from a level-1 node. Because the edges are already the projection onto included nodes, skipped prerequisites never leave gaps in the numbering (a node promoted by an exclusion simply lands one level above whatever still precedes it). This is the same longest-path layering used for walkthroughs, run over the stored projected edges instead of the live DAG.
 
 ### Not Yet Implemented
 

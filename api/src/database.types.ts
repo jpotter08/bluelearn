@@ -352,14 +352,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "learning_path_revision_edges_from_is_node"
+            foreignKeyName: "objective_revision_edges_from_is_node"
             columns: ["revision_id", "from_guide_base_id"]
             isOneToOne: false
             referencedRelation: "objective_revision_nodes"
             referencedColumns: ["revision_id", "guide_base_id"]
           },
           {
-            foreignKeyName: "learning_path_revision_edges_to_is_node"
+            foreignKeyName: "objective_revision_edges_to_is_node"
             columns: ["revision_id", "to_guide_base_id"]
             isOneToOne: false
             referencedRelation: "objective_revision_nodes"
@@ -367,10 +367,54 @@ export type Database = {
           },
         ]
       }
+      objective_revision_node_placements: {
+        Row: {
+          node_id: string
+          position: number
+          revision_id: string
+          target_node_id: string
+        }
+        Insert: {
+          node_id: string
+          position: number
+          revision_id: string
+          target_node_id: string
+        }
+        Update: {
+          node_id?: string
+          position?: number
+          revision_id?: string
+          target_node_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objective_revision_node_placements_node_is_node"
+            columns: ["node_id", "revision_id"]
+            isOneToOne: false
+            referencedRelation: "objective_revision_nodes"
+            referencedColumns: ["id", "revision_id"]
+          },
+          {
+            foreignKeyName: "objective_revision_node_placements_revision_id_fkey"
+            columns: ["revision_id"]
+            isOneToOne: false
+            referencedRelation: "objective_revisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objective_revision_node_placements_target_is_node"
+            columns: ["target_node_id", "revision_id"]
+            isOneToOne: false
+            referencedRelation: "objective_revision_nodes"
+            referencedColumns: ["id", "revision_id"]
+          },
+        ]
+      }
       objective_revision_nodes: {
         Row: {
           guide_base_id: string
           guide_id: string
+          id: string
           is_included: boolean
           is_target: boolean
           note: string | null
@@ -379,6 +423,7 @@ export type Database = {
         Insert: {
           guide_base_id: string
           guide_id: string
+          id?: string
           is_included?: boolean
           is_target?: boolean
           note?: string | null
@@ -387,6 +432,7 @@ export type Database = {
         Update: {
           guide_base_id?: string
           guide_id?: string
+          id?: string
           is_included?: boolean
           is_target?: boolean
           note?: string | null
