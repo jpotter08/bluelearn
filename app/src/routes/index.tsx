@@ -1,17 +1,18 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ChevronRight, Search, SlidersHorizontal, X } from "lucide-react";
 
+import { useEffect, useState } from "react";
+import type { SubjectListItem } from "@bluelearn/schemas";
 import type { HydratedObjective } from "@/types/objectives";
 
 import { Route as SubjectRoute } from "@/routes/subjects.$slug";
-
+import { listSubjects } from "@/lib/api/subjects";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { FeaturedRow } from "@/components/FeaturedRow";
 
-import subjects from "@/data/subjects.json";
 import objectives from "@/data/objectives.json";
 import guides from "@/data/guides.json";
 
@@ -24,6 +25,15 @@ function RouteComponent() {
     guides,
     objectives
   );
+  const [subjects, setSubjects] = useState<Array<SubjectListItem>>([]);
+  useEffect(() => {
+    async function loadSubjects() {
+      const data = await listSubjects();
+      setSubjects(data);
+    }
+
+    loadSubjects().catch(console.error);
+  }, []);
 
   return (
     <div className="mx-auto max-w-[1280px] border-x bg-background">
