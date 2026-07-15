@@ -6,7 +6,7 @@ export function createGuideBase(
   return insert("guide_bases", {
     slug: `guide-${crypto.randomUUID()}`,
     title: "Test Guide",
-    knowledge_type: "theory",
+    knowledge_type: "theoretical",
     ...overrides,
   });
 }

@@ -223,12 +223,12 @@ The original mission constraints (free forever, zero prerequisites, one canonica
 - **Sebastian's take:** Auto-created message thread per dispute, deleted when the dispute resolves.
 - **Status:** tentative — moderation, archival (audit trail vs. delete), and visibility scoping unspecified.
 
-### 7.5 Theory vs. Practice dispute timing
+### 7.5 Theoretical vs. Practical dispute timing
 
 - **Q:** Should disputes have a deadline?
 - **Sebastian's take:**
-  - **Practice guides:** mandatory time limit; verifiers must propose and vote on a resolution before it expires.
-  - **Theory guides:** disputes may exist indefinitely (forcing resolution to "what causes gravity" is absurd). Once a resolution is finally proposed, *that* resolution gets a vote timer.
+  - **Practical guides:** mandatory time limit; verifiers must propose and vote on a resolution before it expires.
+  - **Theoretical guides:** disputes may exist indefinitely (forcing resolution to "what causes gravity" is absurd). Once a resolution is finally proposed, *that* resolution gets a vote timer.
 - **Status:** tentative — concrete time windows are not pinned.
 
 ### 7.6 Vote timers in general
@@ -251,19 +251,19 @@ The original mission constraints (free forever, zero prerequisites, one canonica
 
 ---
 
-## 8. Theory vs. Practice Guides
+## 8. Theoretical vs. Practical Guides
 
-### 8.1 Differentiating Theory and Practice
+### 8.1 Differentiating Theoretical and Practical
 
-- **Q:** Should the system formally distinguish Theory (e.g. 2nd law of thermodynamics) from Practice (e.g. wiring an electrical circuit)?
+- **Q:** Should the system formally distinguish Theoretical (e.g. 2nd law of thermodynamics) from Practical (e.g. wiring an electrical circuit)?
 - **Sebastian's take:** Yes — different labels, different structures.
-  - **Practice guides** are end-goal-shaped: every section pushes toward the goal, simplest components → most complex.
-  - **Theory guides** are centered on explaining the theory itself.
+  - **Practical guides** are end-goal-shaped: every section pushes toward the goal, simplest components → most complex.
+  - **Theoretical guides** are centered on explaining the theory itself.
 - **Status:** tentative — schema differences in storage, rendering, and editing are unspecified.
 
-### 8.2 Strengths/weaknesses (red/green) panel for Theory guides
+### 8.2 Strengths/weaknesses (red/green) panel for Theoretical guides
 
-- **Q:** Theory guides should expose what the theory explains (green) vs. doesn't explain (red), with cross-links to contradicting theories. Who maintains this list?
+- **Q:** Theoretical guides should expose what the theory explains (green) vs. doesn't explain (red), with cross-links to contradicting theories. Who maintains this list?
 - **Sebastian's take:** Probably verifiers — opening it to all users is exploitable. When a theory is updated, verifiers should review which red/green items still apply.
 - **Status:** partial — exact gating, manipulation defenses, and what triggers a red/green review unspecified.
 
@@ -327,7 +327,7 @@ The original mission constraints (free forever, zero prerequisites, one canonica
 
 - **Q:** Should the site track which guides a user has completed?
 - **Sebastian's take:** Yes — and use that to let users build Walkthroughs from *only* uncompleted guides.
-- **Status:** tentative — what counts as "completed" is undefined and especially fraught for Practice guides where completion is a real-world action the site can't observe.
+- **Status:** tentative — what counts as "completed" is undefined and especially fraught for Practical guides where completion is a real-world action the site can't observe.
 
 ---
 
@@ -371,10 +371,10 @@ Sebastian flagged these as "Other Possible Additions" — none have detailed des
 
 - Content-reporting system
 - Guide-requesting system
-- "A Guide to Writing Guides" — for content creators; differentiates Theory vs. Practice; explains hierarchy linkage; covers dispute policy; emphasizes clarity, accuracy, consolidation, elimination of redundancy and trivial content
+- "A Guide to Writing Guides" — for content creators; differentiates Theoretical vs. Practical; explains hierarchy linkage; covers dispute policy; emphasizes clarity, accuracy, consolidation, elimination of redundancy and trivial content
 - Starter Guide — for readers; teaches how the BLUE system itself works
 - 3D model / graph visualization application embeddable inside guides
-- Practice-guide "Priority" labels (Gas Efficiency vs. Cheapness vs. ...) to differentiate *methods* by what they optimize; analogous dimensions for *alternatives* on more theoretical guides; potentially its own filterable category
+- Practical-guide "Priority" labels (Gas Efficiency vs. Cheapness vs. ...) to differentiate *methods* by what they optimize; analogous dimensions for *alternatives* on more theoretical guides; potentially its own filterable category
 - "Bird's Eye" — single visualizer of every hierarchy and guide
 - Recent Changes feed (Wikipedia-style), with filter
 - Notifications / Alerts system

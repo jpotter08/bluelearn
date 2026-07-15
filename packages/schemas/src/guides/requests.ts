@@ -25,7 +25,7 @@ const revisionContentSchema = z.object({
 // least one subject are required; summary/prerequisites/related are optional.
 export const createGuideSchema = z.object({
   tags: z.array(guideSlugSchema).min(1),
-  knowledge_type: knowledgeTypeSchema.default("theory"),
+  knowledge_type: knowledgeTypeSchema.default("theoretical"),
   title: guideTitleSchema,
   slug: guideSlugSchema,
   summary: guideSummarySchema.nullish(),

@@ -47,7 +47,7 @@ describe("POST /guides", () => {
       "/guides",
       jsonAuth(token, "POST", {
         tags: ["algebra"],
-        knowledge_type: "theory",
+        knowledge_type: "theoretical",
         title: "Limits",
         slug: `limits-${crypto.randomUUID().slice(0, 8)}`,
         body: "A first look at limits.",

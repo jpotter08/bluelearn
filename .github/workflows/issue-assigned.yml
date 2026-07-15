@@ -1,0 +1,49 @@
+name: Update issue on assignment
+
+on:
+  issues:
+    types:
+      - assigned
+
+permissions:
+  issues: write
+
+jobs:
+  update-status:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Remove existing status labels and add in-progress
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.payload.issue.number;
+
+            const labels = context.payload.issue.labels
+              .map(label => label.name);
+
+            // remove all labels that start with "status:"
+            for (const label of labels) {
+              if (label.startsWith("status:")) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner,
+                    repo,
+                    issue_number,
+                    name: label,
+                  });
+                } catch (e) {
+                  core.warning(`Failed to remove label '${label}': ${e.message}`);
+                }
+              }
+            }
+
+            // add the in-progress label
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels: ["status:in-progress"],
+            });
