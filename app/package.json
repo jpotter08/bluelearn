@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "pnpm --filter api build && tsc --noEmit"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",

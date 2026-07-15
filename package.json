@@ -13,7 +13,7 @@
     "dev:app": "pnpm --filter app dev",
     "dev:api": "pnpm --filter api dev",
     "build": "pnpm -r build",
-    "typecheck": "pnpm --filter api build && pnpm -r typecheck",
+    "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
