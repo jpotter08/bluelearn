@@ -5,16 +5,85 @@ import { slugify } from "../lib/slug";
 
 type DB = SupabaseClient<Database>;
 
+// Tally rows carrying nested subject tags into a subject_id -> count map. Each
+// row is one guide or objective, so counting tags counts the nodes per subject.
+function tallyBySubject(tagsPerRow: Array<Array<{ subject_id: string }>>) {
+  const counts = new Map<string, number>();
+
+  for (const tags of tagsPerRow) {
+    for (const { subject_id } of tags) {
+      counts.set(subject_id, (counts.get(subject_id) ?? 0) + 1);
+    }
+  }
+
+  return counts;
+}
+
 export async function listSubjects(supabase: DB) {
   const { data, error } = await supabase
     .from("subjects")
-    .select("id, slug, name");
+    .select("id, slug, name, summary");
 
   if (error) {
     console.error(error);
     throw new ServiceError("Failed to load subjects", 500);
   }
-  return data ?? [];
+
+  // Counts mirror the filters listSubjectGuides/listSubjectObjectives apply, so
+  // a total here matches the length of the list those endpoints return.
+  const [guideCounts, objectiveCounts] = await Promise.all([
+    countGuidesBySubject(supabase),
+    countObjectivesBySubject(supabase),
+  ]);
+
+  return (data ?? []).map((subject) => ({
+    ...subject,
+    guides_total: guideCounts.get(subject.id) ?? 0,
+    objectives_total: objectiveCounts.get(subject.id) ?? 0,
+  }));
+}
+
+async function countGuidesBySubject(supabase: DB) {
+  const { data, error } = await supabase.from("guide_bases").select(
+    `id,
+       canonical:guides!guide_bases_canonical_guide_id_fkey!inner(
+         current:guide_revisions!guides_current_revision_id_fkey!inner(
+           guide_revision_subjects!inner(subject_id)
+         )
+       )`
+  );
+
+  if (error) {
+    console.error(error);
+    throw new ServiceError("Failed to load subjects", 500);
+  }
+
+  return tallyBySubject(
+    (data ?? []).map((base) => base.canonical.current.guide_revision_subjects)
+  );
+}
+
+async function countObjectivesBySubject(supabase: DB) {
+  const { data, error } = await supabase
+    .from("objectives")
+    .select(
+      `id,
+       current:objective_revisions!objectives_current_revision_id_fkey!inner(
+         objective_revision_subjects!inner(subject_id)
+       )`
+    )
+    .eq("status", "published");
+
+  if (error) {
+    console.error(error);
+    throw new ServiceError("Failed to load subjects", 500);
+  }
+
+  return tallyBySubject(
+    (data ?? []).map(
+      (objective) => objective.current.objective_revision_subjects
+    )
+  );
 }
 
 export async function createSubject(

@@ -16,7 +16,7 @@
                 subjects:
                   type: array
                   items:
-                    $ref: "../components/schemas/subjects/Subject.yaml"
+                    $ref: "../components/schemas/subjects/SubjectListItem.yaml"
               required: [subjects]
   post:
     tags: [subjects]

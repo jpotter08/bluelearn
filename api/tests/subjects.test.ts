@@ -21,6 +21,55 @@ describe("GET /subjects", () => {
     const body = (await res.json()) as { subjects: Array<{ id: string }> };
     expect(body.subjects.map((s) => s.id)).toContain(subject.id);
   });
+
+  it("totals the guides and objectives tagged with each subject", async () => {
+    const { userId } = await makeUser();
+    const subject = await createSubject();
+    const target = await createPublishedGuide();
+
+    const tagged = await createPublishedGuide();
+    await tagGuideRevision(tagged.revision.id, subject.id);
+    // Untagged nodes of both kinds exist, so a passing count means the totals
+    // are scoped by tag rather than counting every published node.
+    await createPublishedGuide();
+
+    const objective = await createPublishedObjective(userId, target);
+    await tagObjectiveRevision(objective.revision.id, subject.id);
+    await createPublishedObjective(userId, target);
+
+    const res = await app.request("/subjects", {}, env);
+
+    expect(res.status).toBe(200);
+    await expectToMatchSpec(res, "GET", "/subjects");
+    const body = (await res.json()) as {
+      subjects: Array<{
+        id: string;
+        guides_total: number;
+        objectives_total: number;
+      }>;
+    };
+    const found = body.subjects.find((s) => s.id === subject.id);
+    expect(found?.guides_total).toBe(1);
+    expect(found?.objectives_total).toBe(1);
+  });
+
+  it("reports zero totals for a subject with no tags", async () => {
+    const subject = await createSubject();
+
+    const res = await app.request("/subjects", {}, env);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      subjects: Array<{
+        id: string;
+        guides_total: number;
+        objectives_total: number;
+      }>;
+    };
+    const found = body.subjects.find((s) => s.id === subject.id);
+    expect(found?.guides_total).toBe(0);
+    expect(found?.objectives_total).toBe(0);
+  });
 });
 
 describe("POST /subjects", () => {
