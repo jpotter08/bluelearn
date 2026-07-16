@@ -7,10 +7,30 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -801,6 +821,7 @@ export type Database = {
           id: string
           name: string
           slug: string
+          status: Database["public"]["Enums"]["subject_status"]
           summary: string | null
         }
         Insert: {
@@ -809,6 +830,7 @@ export type Database = {
           id?: string
           name: string
           slug: string
+          status?: Database["public"]["Enums"]["subject_status"]
           summary?: string | null
         }
         Update: {
@@ -817,6 +839,7 @@ export type Database = {
           id?: string
           name?: string
           slug?: string
+          status?: Database["public"]["Enums"]["subject_status"]
           summary?: string | null
         }
         Relationships: [
@@ -1050,6 +1073,7 @@ export type Database = {
       review_outcome: "approved" | "rejected"
       revision_status: "draft" | "submitted"
       seat_status: "assigned" | "recused" | "replaced" | "completed"
+      subject_status: "draft" | "published"
       todo_status: "open" | "resolved"
       vote_direction: "up" | "down"
     }
@@ -1177,6 +1201,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["verifier", "moderator", "curator", "admin"],
@@ -1207,8 +1234,10 @@ export const Constants = {
       review_outcome: ["approved", "rejected"],
       revision_status: ["draft", "submitted"],
       seat_status: ["assigned", "recused", "replaced", "completed"],
+      subject_status: ["draft", "published"],
       todo_status: ["open", "resolved"],
       vote_direction: ["up", "down"],
     },
   },
 } as const
+

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import app from "../src/index";
-import { env, jsonAuth, makeUser } from "./helpers";
+import { env, makeUser } from "./helpers";
 import {
   createSubject,
   tagGuideRevision,
@@ -20,48 +20,6 @@ describe("GET /subjects", () => {
     await expectToMatchSpec(res, "GET", "/subjects");
     const body = (await res.json()) as { subjects: Array<{ id: string }> };
     expect(body.subjects.map((s) => s.id)).toContain(subject.id);
-  });
-});
-
-describe("POST /subjects", () => {
-  it("401s without a token", async () => {
-    const res = await app.request("/subjects", { method: "POST" }, env);
-    expect(res.status).toBe(401);
-    await expectToMatchSpec(res, "POST", "/subjects");
-  });
-
-  it("creates a subject with a slug derived from its name", async () => {
-    const { token } = await makeUser();
-    // subjectNameSchema caps names at 35 chars, so keep the unique part short.
-    const name = `Algebra ${crypto.randomUUID().slice(0, 8)}`;
-
-    const res = await app.request(
-      "/subjects",
-      jsonAuth(token, "POST", { name }),
-      env
-    );
-
-    expect(res.status).toBe(201);
-    await expectToMatchSpec(res, "POST", "/subjects");
-    const body = (await res.json()) as {
-      subject: { slug: string; name: string };
-    };
-    expect(body.subject.name).toBe(name);
-    expect(body.subject.slug).toBe(name.toLowerCase().replaceAll(" ", "-"));
-  });
-
-  it("409s on a duplicate subject", async () => {
-    const { token } = await makeUser();
-    const subject = await createSubject();
-
-    const res = await app.request(
-      "/subjects",
-      jsonAuth(token, "POST", { name: subject.name }),
-      env
-    );
-
-    expect(res.status).toBe(409);
-    await expectToMatchSpec(res, "POST", "/subjects");
   });
 });
 

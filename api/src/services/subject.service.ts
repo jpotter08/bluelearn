@@ -5,10 +5,13 @@ import { slugify } from "../lib/slug";
 
 type DB = SupabaseClient<Database>;
 
+// Published only: draft subjects are unreviewed inline proposals from guide
+// drafts and must stay out of browse and the tag picker until their guide lands.
 export async function listSubjects(supabase: DB) {
   const { data, error } = await supabase
     .from("subjects")
-    .select("id, slug, name");
+    .select("id, slug, name")
+    .eq("status", "published");
 
   if (error) {
     console.error(error);
@@ -17,28 +20,40 @@ export async function listSubjects(supabase: DB) {
   return data ?? [];
 }
 
+// Create-or-fetch by slug: subjects are only created through contribution flows,
+// where a re-saved draft or a name two drafts share must resolve to the existing
+// row. New rows start 'draft' (column default), promoted on guide approval.
 export async function createSubject(
   supabase: DB,
   userId: string,
-  name: string
+  name: string,
+  summary?: string | null
 ) {
   const slug = slugify(name);
   if (!slug)
     throw new ServiceError(
-      "Title must contain at least one letter or number",
+      "Subject must contain at least one letter or number",
       400
     );
 
+  const { data: existing, error: findError } = await supabase
+    .from("subjects")
+    .select("id, slug, name")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (findError) {
+    console.error(findError);
+    throw new ServiceError("Failed to resolve subject", 500);
+  }
+  if (existing) return existing;
+
   const { data, error } = await supabase
     .from("subjects")
-    .insert({ slug, name, creator_id: userId })
+    .insert({ slug, name, summary: summary ?? null, creator_id: userId })
     .select("id, slug, name")
     .single();
 
   if (error) {
-    if (error.code === "23505") {
-      throw new ServiceError("Subject already exists", 409);
-    }
     console.error(error);
     throw new ServiceError("Failed to create subject", 500);
   }

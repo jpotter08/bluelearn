@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CreateGuideInput, CreateVariantInput } from "@bluelearn/schemas";
 import type { Database } from "../database.types";
 import { ServiceError } from "../lib/service-error";
+import { syncDraftTagsAndEdges } from "./guide-revision.service";
 
 type DB = SupabaseClient<Database>;
 
@@ -97,12 +98,24 @@ export async function listPublishedGuides(supabase: DB) {
   }));
 }
 
-// Create a guide: bundles the guide_base + first guide + draft revision in one
-// transaction via the create_guide RPC (RLS still applies, SECURITY INVOKER).
-// The draft starts empty (title/slug filled in the editor); returns the draft
-// revision id so the client can route to its editor.
-export async function createGuide(supabase: DB, input: CreateGuideInput) {
-  const { title, knowledge_type, summary, body } = input;
+// Create a guide: the create_guide RPC bundles the guide_base + first guide +
+// draft revision, then we attach its tags and edges. Returns the draft revision
+// id so the client can keep editing or submit it.
+export async function createGuide(
+  supabase: DB,
+  userId: string,
+  input: CreateGuideInput
+) {
+  const {
+    title,
+    knowledge_type,
+    summary,
+    body,
+    tags,
+    prerequisites,
+    newSubjects,
+    todoPrereqs,
+  } = input;
 
   const { data: revision_id, error } = await supabase.rpc("create_guide", {
     p_title: title ?? undefined,
@@ -115,6 +128,13 @@ export async function createGuide(supabase: DB, input: CreateGuideInput) {
     console.error(error);
     throw new ServiceError("Failed to create guide", 500);
   }
+
+  await syncDraftTagsAndEdges(supabase, userId, revision_id, {
+    tags,
+    prerequisites,
+    newSubjects,
+    todoPrereqs,
+  });
 
   return { revision_id };
 }
