@@ -25,31 +25,35 @@ type PropTypes = {
   setType: (value: ContributionType) => void;
 };
 
-export default function ContributionFlow({ type, setType }: PropTypes) {
-  const [guideContData, setGuideContData] = useState<GuideContribution>({
-    type: "",
-    title: "",
-    summary: "",
-    subjects: [],
-    newSubjects: [],
-    prereqs: [],
-    todoPrereqs: [],
-  });
+const createGuideContData = (): GuideContribution => ({
+  type: "",
+  title: "",
+  summary: "",
+  subjects: [],
+  newSubjects: [],
+  prereqs: [],
+  todoPrereqs: [],
+});
 
+const createObjectiveContData = (): ObjectiveContribution => ({
+  title: "",
+  summary: "",
+  targets: [
+    "arithmetic-introduction",
+    "algebra-how-to-express-equations",
+    "calculus-introduction",
+    "vectors-introduction",
+    "mechanics-how-to-apply-newtons-laws",
+  ],
+  featured: "",
+  subObjectives: [],
+});
+
+export default function ContributionFlow({ type, setType }: PropTypes) {
+  const [guideContData, setGuideContData] =
+    useState<GuideContribution>(createGuideContData);
   const [objectiveContData, setObjectiveContData] =
-    useState<ObjectiveContribution>({
-      title: "",
-      summary: "",
-      targets: [
-        "arithmetic-introduction",
-        "algebra-how-to-express-equations",
-        "calculus-introduction",
-        "vectors-introduction",
-        "mechanics-how-to-apply-newtons-laws",
-      ],
-      featured: "",
-      subObjectives: [],
-    });
+    useState<ObjectiveContribution>(createObjectiveContData);
 
   const StepperInstance = useMemo(() => {
     if (!type) {
@@ -104,7 +108,11 @@ function Inner({
   setObjectiveContData: Dispatch<SetStateAction<ObjectiveContribution>>;
 }) {
   const pickType = (value: ContributionType) => {
-    setType(value);
+    if (type !== value) {
+      setGuideContData(createGuideContData());
+      setObjectiveContData(createObjectiveContData());
+      setType(value);
+    }
 
     requestAnimationFrame(() => {
       switch (value) {
