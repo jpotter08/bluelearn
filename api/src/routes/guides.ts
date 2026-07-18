@@ -147,26 +147,20 @@ export const variantsRouter = new Hono<HonoEnv>()
     requireUser,
     zValidator("json", castVoteSchema),
     async (c) => {
-      const { vote, promotion } = await castVote(
+      const { vote } = await castVote(
         c.get("supabase"),
         c.get("user").id,
         c.req.param("id"),
         c.req.valid("json")
       );
-      return c.json({ vote, promotion });
+      return c.json({ vote });
     }
   )
 
-  // 200 with { promotion } once the caller's vote is gone. The body carries
-  // the canonical-promotion result so the client can refresh if a flip
-  // happened; previously this was a 204 with no body.
+  // 204 once the caller's vote is gone.
   .delete("/:id/vote", requireUser, async (c) => {
-    const promotion = await retractVote(
-      c.get("supabase"),
-      c.get("user").id,
-      c.req.param("id")
-    );
-    return c.json({ promotion }, 200);
+    await retractVote(c.get("supabase"), c.get("user").id, c.req.param("id"));
+    return c.body(null, 204);
   })
 
   // Returns the published versions as { revisions }, newest live first.

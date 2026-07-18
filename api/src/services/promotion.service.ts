@@ -4,53 +4,17 @@ import { ServiceError } from "../lib/service-error";
 
 type DB = SupabaseClient<Database>;
 
-export type PromotionResult = {
-  canonical_guide_id: string | null;
-  promoted: boolean;
-};
-
-// Calls the promote_canonical_guide RPC for one base. Used by castVote /
-// retractVote so a vote that flips the ranking is reflected immediately.
-// Returns { canonical_guide_id, promoted } so the route can surface the
-// outcome to the caller. A missing base returns null without throwing.
-// The vote itself already succeeded; promotion is best-effort.
+// Re-evaluate one base's canonical via the promote_canonical_guide RPC. Called
+// from castVote / retractVote so a vote that flips the ranking takes effect
+// immediately.
 export async function promoteCanonicalIfNeeded(
   supabase: DB,
   guideBaseId: string
-): Promise<PromotionResult> {
-  const { data: before, error: beforeError } = await supabase
-    .from("guide_bases")
-    .select("canonical_guide_id")
-    .eq("id", guideBaseId)
-    .maybeSingle();
-
-  if (beforeError) {
-    console.error(beforeError);
-    throw new ServiceError("Failed to load guide base for promotion", 500);
-  }
-  if (!before) {
-    // Base missing: vote path already validated it, so this is a race.
-    // Report no promotion rather than crashing the vote.
-    return { canonical_guide_id: null, promoted: false };
-  }
-
-  const beforeId = before.canonical_guide_id ?? null;
-
-  const { data: afterId, error: rpcError } = await supabase.rpc(
-    "promote_canonical_guide",
-    { p_guide_base_id: guideBaseId }
-  );
-
-  if (rpcError) {
-    console.error(rpcError);
-    throw new ServiceError("Failed to evaluate canonical promotion", 500);
-  }
-
-  const newId = (afterId as string | null) ?? null;
-  return {
-    canonical_guide_id: newId,
-    promoted: newId !== null && newId !== beforeId,
-  };
+) {
+  const { error } = await supabase.rpc("promote_canonical_guide", {
+    p_guide_base_id: guideBaseId,
+  });
+  if (error) console.error(error);
 }
 
 // Cron-path reconciliation: re-evaluate every published base. Catches up

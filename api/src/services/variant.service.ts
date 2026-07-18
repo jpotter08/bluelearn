@@ -2,10 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CastVoteInput } from "@bluelearn/schemas";
 import type { Database } from "../database.types";
 import { ServiceError } from "../lib/service-error";
-import {
-  promoteCanonicalIfNeeded,
-  type PromotionResult,
-} from "./promotion.service";
+import { promoteCanonicalIfNeeded } from "./promotion.service";
 
 type DB = SupabaseClient<Database>;
 
@@ -118,25 +115,15 @@ export async function castVote(
   const { reason, ...rest } = data;
   const vote = reason === null ? rest : { ...rest, reason };
 
-  // Best-effort canonical promotion. A failure here must not roll back the
-  // vote; the cron reconciliation will catch up.
-  let promotion: PromotionResult;
-  try {
-    promotion = await promoteCanonicalIfNeeded(supabase, variant.guide_base_id);
-  } catch (err) {
-    console.error(err);
-    promotion = { canonical_guide_id: null, promoted: false };
-  }
-  return { vote, promotion };
+  // A vote can flip the canonical ranking. Best-effort: a failure here must
+  // not roll back the vote, the cron reconciliation will catch up.
+  await promoteCanonicalIfNeeded(supabase, variant.guide_base_id);
+
+  return { vote };
 }
 
 // Retract the caller's vote. A no-op delete (no matching row) is still success.
-// Returns the promotion check result so the route can surface it.
-export async function retractVote(
-  supabase: DB,
-  voterId: string,
-  id: string
-): Promise<PromotionResult> {
+export async function retractVote(supabase: DB, voterId: string, id: string) {
   const variant = await requireVariant(supabase, id);
 
   const { error } = await supabase
@@ -150,14 +137,9 @@ export async function retractVote(
     throw new ServiceError("Failed to retract vote", 500);
   }
 
-  // Retracting a vote from the current canonical can drop it below the
-  // margin, letting a challenger take over. Best-effort, like castVote.
-  try {
-    return await promoteCanonicalIfNeeded(supabase, variant.guide_base_id);
-  } catch (err) {
-    console.error(err);
-    return { canonical_guide_id: null, promoted: false };
-  }
+  // Retracting a vote from the current canonical can drop it below the margin,
+  // letting a challenger take over. Best-effort, like castVote.
+  await promoteCanonicalIfNeeded(supabase, variant.guide_base_id);
 }
 
 // The variant's published-version timeline: only revisions that went live,

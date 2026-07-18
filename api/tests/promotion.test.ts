@@ -73,8 +73,8 @@ describe("PUT /variants/{id}/vote: canonical promotion", () => {
       for (let i = 0; i < 20; i++) {
         voters.push(await makeUser());
       }
-      // Seed 19 votes via factory (bypasses API), cast 20th via API to
-      // observe the promotion field in the response.
+      // Seed 19 votes via factory (bypasses API), cast 20th via API so the
+      // vote path triggers the eager promotion.
       for (let i = 0; i < 19; i++) {
         await createVote(voters[i].userId, challenger.id, { direction: "up" });
       }
@@ -88,12 +88,6 @@ describe("PUT /variants/{id}/vote: canonical promotion", () => {
 
       expect(res.status).toBe(200);
       await expectToMatchSpec(res, "PUT", "/variants/{id}/vote");
-      const body = (await res.json()) as {
-        vote: { direction: string };
-        promotion: { canonical_guide_id: string; promoted: boolean };
-      };
-      expect(body.promotion.promoted).toBe(true);
-      expect(body.promotion.canonical_guide_id).toBe(challenger.id);
       expect(await getCanonicalId(base.id)).toBe(challenger.id);
     },
     OPTS
@@ -129,10 +123,6 @@ describe("PUT /variants/{id}/vote: canonical promotion", () => {
       );
 
       expect(res.status).toBe(200);
-      const body = (await res.json()) as {
-        promotion: { promoted: boolean };
-      };
-      expect(body.promotion.promoted).toBe(false);
       expect(await getCanonicalId(base.id)).toBe(incumbent.id);
     },
     OPTS
@@ -177,10 +167,6 @@ describe("PUT /variants/{id}/vote: canonical promotion", () => {
       );
 
       expect(res.status).toBe(200);
-      const body = (await res.json()) as {
-        promotion: { promoted: boolean };
-      };
-      expect(body.promotion.promoted).toBe(false);
       expect(await getCanonicalId(base.id)).toBe(incumbent.id);
     },
     OPTS
@@ -188,13 +174,11 @@ describe("PUT /variants/{id}/vote: canonical promotion", () => {
 });
 
 describe("DELETE /variants/{id}/vote: canonical promotion on retraction", () => {
-  it("returns 200 with a promotion body", async () => {
+  it("runs the promotion check without disturbing a single-variant base", async () => {
     const author = await makeUser();
-    const { guide: incumbent } = await createPublishedGuide({
+    const { base, guide: incumbent } = await createPublishedGuide({
       authorId: author.userId,
     });
-    // Single-variant base: no flip possible, but the response shape must
-    // still be { promotion: { canonical_guide_id, promoted } }.
     const voter = await makeUser();
     await createVote(voter.userId, incumbent.id, { direction: "up" });
 
@@ -204,12 +188,8 @@ describe("DELETE /variants/{id}/vote: canonical promotion on retraction", () => 
       env
     );
 
-    expect(res.status).toBe(200);
-    await expectToMatchSpec(res, "DELETE", "/variants/{id}/vote");
-    const body = (await res.json()) as {
-      promotion: { canonical_guide_id: string; promoted: boolean };
-    };
-    expect(body.promotion.canonical_guide_id).toBe(incumbent.id);
-    expect(body.promotion.promoted).toBe(false);
+    expect(res.status).toBe(204);
+    // No sibling to promote, so canonical stays put.
+    expect(await getCanonicalId(base.id)).toBe(incumbent.id);
   });
 });
