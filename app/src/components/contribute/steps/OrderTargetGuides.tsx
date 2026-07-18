@@ -74,7 +74,7 @@ export const OrderTargetGuides = ({
 
             return (
               <DraggableGuideCard
-                key={index}
+                key={slug}
                 guide={guide}
                 index={index}
                 isDragging={isDragging}

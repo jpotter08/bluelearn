@@ -216,23 +216,6 @@ export const OrderObjectiveGuides = ({
 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const draggedIndexRef = useRef<number | null>(null);
-  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(
-    null
-  );
-
-  useEffect(() => {
-    if (!scrollContainer) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      if (e.deltaY !== 0) {
-        e.preventDefault();
-        scrollContainer.scrollLeft += e.deltaY;
-      }
-    };
-
-    scrollContainer.addEventListener("wheel", handleWheel, { passive: false });
-    return () => scrollContainer.removeEventListener("wheel", handleWheel);
-  }, [scrollContainer]);
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     draggedIndexRef.current = index;
@@ -285,16 +268,13 @@ export const OrderObjectiveGuides = ({
     >
       <StepperActionHeader title={"Order Guides"} Stepper={Stepper} />
 
-      <FieldGroup className="mt-4 flex min-h-0 flex-1 flex-col">
+      <FieldGroup className="mt-0 flex min-h-0 flex-1 flex-col">
         {/* Target Guide Sequence */}
-        <Field className="mb-4 shrink-0 space-y-2">
+        <Field className="mb-0 shrink-0 space-y-2">
           <FieldLabel className="font-mono text-[11px] tracking-[0.08em] text-muted-foreground uppercase">
             Target Guide Sequence
           </FieldLabel>
-          <div
-            ref={setScrollContainer}
-            className="flex scrollbar-none items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-          >
+          <div className="flex [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] items-center gap-2 overflow-x-auto pb-2 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
             {objectiveContData.targets.map((slug, index) => {
               const guide = guidesMap.get(slug);
               if (!guide) return null;
@@ -365,7 +345,7 @@ export const OrderObjectiveGuides = ({
                 Build the sequential learning plan by ordering selected guides.
               </CardDescription>
             </CardHeader>
-            <CardContent className="min-h-0 flex-1 overflow-y-auto p-4">
+            <CardContent className="min-h-0 flex-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto p-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
               {curatedSequence.length === 0 && walkthroughNodes.length > 1 && (
                 <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
                   <Info className="mb-2 h-8 w-8 text-muted-foreground opacity-50" />
