@@ -9,10 +9,13 @@ import {
   ArrowBigDown,
   ArrowBigUp,
   Ellipsis,
+  History,
   House,
   Pencil,
   Plus,
   Replace,
+  Target,
+  Users,
 } from "lucide-react";
 
 import type { GuideReference, HydratedGuide } from "@/types/guides";
@@ -85,13 +88,13 @@ function RouteComponent() {
               <Replace className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="lg" onClick={() => {}}>
-              <Replace className="h-4 w-4" />
+              <Target className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="lg" onClick={() => {}}>
-              <Replace className="h-4 w-4" />
+              <Users className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="lg" onClick={() => {}}>
-              <Replace className="h-4 w-4" />
+              <History className="h-4 w-4" />
             </Button>
           </div>
           {/* Prerequisites */}
