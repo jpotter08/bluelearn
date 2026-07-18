@@ -233,7 +233,7 @@ export async function diffRevisions(supabase: DB, id: string, otherId: string) {
 export async function diffWithPrevious(supabase: DB, id: string) {
   const { data: current, error: currentError } = await supabase
     .from("guide_revisions")
-    .select("id, guide_id")
+    .select("id, guide_id, approved_at")
     .eq("id", id)
     .maybeSingle();
 
@@ -249,6 +249,7 @@ export async function diffWithPrevious(supabase: DB, id: string) {
     .eq("guide_id", current.guide_id)
     .not("approved_at", "is", null)
     .neq("id", id)
+    .lt("approved_at", current.approved_at)
     .order("approved_at", { ascending: false })
     .limit(1)
     .maybeSingle();
