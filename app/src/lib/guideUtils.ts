@@ -17,7 +17,7 @@ export function formatDuration(minutes: number): string {
   return `${hours} hr${hours > 1 ? "s" : ""} ${mins} min`;
 }
 
-// rough read time for the submit preview, ~200 wpm, min 1
+// Rough read time for the submit preview (~200 wpm)
 export function estimateReadMinutes(markdown: string): number {
   const words = markdown.trim().split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(words / 200));

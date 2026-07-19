@@ -6,9 +6,6 @@ export const guideTitleSchema = z.string().trim().min(1).max(200);
 export const guideSummarySchema = z.string().trim().max(500);
 export const guideBodySchema = z.string().trim();
 export const guideChangeSummarySchema = z.string().trim().max(500);
-
-// A free-text "missing prerequisite" note: a guide the author knows should
-// exist but does not yet, recorded as a todo rather than a real edge.
 export const guideTodoTitleSchema = z.string().trim().min(1).max(200);
 
 // URL handle. Lowercased, hyphen-separated alphanumeric segments only, matching

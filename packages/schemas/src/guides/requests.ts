@@ -21,19 +21,11 @@ const revisionContentSchema = z.object({
   body: guideBodySchema.nullish(),
 });
 
-// A subject the author declares inline while drafting: created (if new) and
-// tagged in the same write. summary maps to the subjects.summary column.
 export const newSubjectSchema = z.object({
   name: subjectNameSchema,
   summary: guideSummarySchema.nullish(),
 });
 
-// The guide-creation payload from the multistep contribution form. POST /guides
-// only ever opens a draft, so every content field is optional here and
-// completeness is enforced when the draft is submitted for review. tags are
-// existing subject slugs; newSubjects are created then tagged; prerequisites are
-// existing guide slugs; todoPrereqs are free-text missing-prerequisite notes.
-// slug is derived from the title at publish, so it is never sent by the client.
 export const createGuideSchema = z.object({
   knowledge_type: knowledgeTypeSchema.default("theoretical"),
   title: guideTitleSchema.nullish(),
@@ -51,10 +43,7 @@ export const createGuideSchema = z.object({
 export const createVariantSchema = revisionContentSchema;
 
 // Edits to a draft revision before it goes for review. Send only the fields you
-// want to change (at least one is required). Every content field is freely
-// editable here (title included) since the draft isn't held to completeness
-// until submit. tags/prerequisites/todoPrereqs each fully replace their set when
-// present, and newSubjects are created then folded into the tag set.
+// want to change (at least one is required).
 export const updateRevisionSchema = revisionContentSchema
   .extend({
     title: guideTitleSchema.nullish(),
