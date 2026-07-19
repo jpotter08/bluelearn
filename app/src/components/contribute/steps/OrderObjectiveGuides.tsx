@@ -112,6 +112,7 @@ export const OrderObjectiveGuides = ({
   const [curatedSequence, setCuratedSequence] = useState<Array<string>>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [hoveredGuide, setHoveredGuide] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<"sequence" | "graph">("sequence");
 
   const targetGuide = targetSlug ? guidesMap.get(targetSlug) : undefined;
 
@@ -270,7 +271,7 @@ export const OrderObjectiveGuides = ({
 
       <FieldGroup className="mt-0 flex min-h-0 flex-1 flex-col">
         {/* Target Guide Sequence */}
-        <Field className="mb-0 shrink-0 space-y-2">
+        <Field className="mb-0 min-w-0 shrink-0 space-y-2">
           <div className="flex items-baseline gap-4">
             <FieldLabel className="font-mono text-[11px] tracking-[0.08em] whitespace-nowrap text-muted-foreground uppercase">
               Target Guide Sequence
@@ -315,18 +316,45 @@ export const OrderObjectiveGuides = ({
             })}
           </div>
         </Field>
+
+        {/* Mobile Tab Switcher */}
+        <div className="mb-4 flex w-full shrink-0 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground lg:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileTab("sequence")}
+            className={`inline-flex flex-1 items-center justify-center rounded-sm px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all ${
+              mobileTab === "sequence"
+                ? "bg-background text-foreground shadow-sm"
+                : "hover:bg-muted-foreground/10 hover:text-foreground"
+            }`}
+          >
+            Sequence
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileTab("graph")}
+            className={`inline-flex flex-1 items-center justify-center rounded-sm px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all ${
+              mobileTab === "graph"
+                ? "bg-background text-foreground shadow-sm"
+                : "hover:bg-muted-foreground/10 hover:text-foreground"
+            }`}
+          >
+            Graph
+          </button>
+        </div>
+
         <div
           className={
             isFullscreen
-              ? "fixed inset-0 z-50 grid animate-in grid-cols-1 items-stretch gap-6 bg-background/95 p-6 backdrop-blur-md fade-in lg:grid-cols-12"
-              : "grid min-h-0 w-full flex-1 grid-cols-1 items-stretch gap-6 lg:grid-cols-12"
+              ? "fixed inset-0 z-50 grid animate-in grid-cols-1 items-stretch gap-6 bg-background/95 p-6 backdrop-blur-md fade-in lg:grid-cols-12 lg:grid-rows-1"
+              : "grid min-h-0 w-full flex-1 grid-cols-1 items-stretch gap-6 lg:grid-cols-12 lg:grid-rows-1"
           }
         >
           {/* Left Pane: Curated Sequence */}
           <Card
-            className={`flex h-full max-h-full min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-card/35 shadow-none backdrop-blur-sm ${
-              isFullscreen ? "lg:col-span-4" : "lg:col-span-5"
-            }`}
+            className={`min-h-0 w-full flex-col self-start overflow-hidden rounded-lg border border-border bg-card/35 shadow-none backdrop-blur-sm ${
+              mobileTab === "sequence" ? "flex" : "hidden lg:flex"
+            } ${isFullscreen ? "lg:col-span-4" : "lg:col-span-5"}`}
           >
             <CardHeader className="border-b pb-4">
               <div className="flex w-full items-center justify-between">
@@ -347,7 +375,7 @@ export const OrderObjectiveGuides = ({
                 Build the sequential learning plan by ordering selected guides.
               </CardDescription>
             </CardHeader>
-            <CardContent className="min-h-0 flex-1 scrollbar-thin [scrollbar-color:var(--border)_transparent] overflow-y-auto p-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
+            <CardContent className="max-h-128 min-h-0 flex-1 scrollbar-thin [scrollbar-color:var(--border)_transparent] overflow-y-auto p-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
               {curatedSequence.length === 0 && walkthroughNodes.length > 1 && (
                 <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
                   <Info className="mb-2 h-8 w-8 text-muted-foreground opacity-50" />
@@ -500,9 +528,9 @@ export const OrderObjectiveGuides = ({
 
           {/* Right Pane: Generated Walkthrough by Level */}
           <Card
-            className={`flex h-full max-h-full min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-muted/10 shadow-none ${
-              isFullscreen ? "lg:col-span-8" : "lg:col-span-7"
-            }`}
+            className={`h-full max-h-full min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-muted/10 shadow-none ${
+              mobileTab === "graph" ? "flex" : "hidden lg:flex"
+            } ${isFullscreen ? "lg:col-span-8" : "lg:col-span-7"}`}
           >
             <CardHeader className="border-b pb-4">
               <div className="flex w-full items-center justify-between">
