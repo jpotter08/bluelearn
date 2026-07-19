@@ -83,8 +83,8 @@ export function Navbar() {
               </Link>
             </div>
 
-            {/* Desktop Profile Dropdown */}
             {session ? (
+              /* Desktop Profile Dropdown */
               <div className="hidden md:block">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -118,18 +118,12 @@ export function Navbar() {
                 </DropdownMenu>
               </div>
             ) : (
-              <div className="hidden items-center gap-2 md:flex">
+              <div className="hidden md:flex">
                 <Link
                   to="/login"
-                  className="font-mono text-xs tracking-[0.08em] text-muted-foreground uppercase transition-colors hover:text-foreground"
+                  className="rounded-md border border-border px-4 py-2 font-mono text-xs tracking-[0.08em] uppercase transition-colors hover:text-foreground"
                 >
-                  Sign in
-                </Link>
-                <Link
-                  to="/register"
-                  className="font-mono text-xs tracking-[0.08em] uppercase transition-colors hover:text-foreground"
-                >
-                  Sign up
+                  Sign In
                 </Link>
               </div>
             )}
