@@ -8,6 +8,7 @@ import type {
   ContributionType,
   GuideContribution,
   ObjectiveContribution,
+  VariantContribution,
 } from "@/types/contributions";
 
 import { SelectType } from "@/components/contribute/steps/SelectType";
@@ -35,16 +36,18 @@ const createGuideContData = (): GuideContribution => ({
   todoPrereqs: [],
 });
 
+const createVariantContData = (): VariantContribution => ({
+  type: "",
+  title: "",
+  summary: "",
+  baseGuide: "",
+  subjects: [],
+});
+
 const createObjectiveContData = (): ObjectiveContribution => ({
   title: "",
   summary: "",
-  targets: [
-    "arithmetic-introduction",
-    "algebra-how-to-express-equations",
-    "calculus-introduction",
-    "vectors-introduction",
-    "mechanics-how-to-apply-newtons-laws",
-  ],
+  targets: [],
   featured: "",
   subObjectives: [],
 });
@@ -52,6 +55,9 @@ const createObjectiveContData = (): ObjectiveContribution => ({
 export default function ContributionFlow({ type, setType }: PropTypes) {
   const [guideContData, setGuideContData] =
     useState<GuideContribution>(createGuideContData);
+  const [variantContData, setVariantContData] = useState<VariantContribution>(
+    createVariantContData
+  );
   const [objectiveContData, setObjectiveContData] =
     useState<ObjectiveContribution>(createObjectiveContData);
 
@@ -78,6 +84,8 @@ export default function ContributionFlow({ type, setType }: PropTypes) {
           setType={setType}
           guideContData={guideContData}
           setGuideContData={setGuideContData}
+          variantContData={variantContData}
+          setVariantContData={setVariantContData}
           objectiveContData={objectiveContData}
           setObjectiveContData={setObjectiveContData}
         />
@@ -93,6 +101,8 @@ function Inner({
   setType,
   guideContData,
   setGuideContData,
+  variantContData,
+  setVariantContData,
   objectiveContData,
   setObjectiveContData,
 }: {
@@ -103,6 +113,8 @@ function Inner({
 
   guideContData: GuideContribution;
   setGuideContData: Dispatch<SetStateAction<GuideContribution>>;
+  variantContData: VariantContribution;
+  setVariantContData: Dispatch<SetStateAction<VariantContribution>>;
 
   objectiveContData: ObjectiveContribution;
   setObjectiveContData: Dispatch<SetStateAction<ObjectiveContribution>>;
@@ -161,7 +173,11 @@ function Inner({
           setGuideContData={setGuideContData}
         />
 
-        <VariantDetails Stepper={Stepper} />
+        <VariantDetails
+          Stepper={Stepper}
+          variantContData={variantContData}
+          setVariantContData={setVariantContData}
+        />
 
         <ObjectiveDetails
           Stepper={Stepper}
