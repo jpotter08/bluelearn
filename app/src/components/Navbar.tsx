@@ -25,7 +25,6 @@ const navItems: Array<{ label: string; to: string; role?: string }> = [
 
 const profileItems = [
   { label: "Profile", to: "/profile" },
-  { label: "Saved", to: "/saved" },
   { label: "Settings", to: "/settings" },
 ];
 
