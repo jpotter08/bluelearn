@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { GuideCard } from "@/components/cards/GuideCard";
 
 import { Route as GuideRoute } from "@/routes/guides/$slug/index";
@@ -6,11 +5,10 @@ import { Route as GuideWalkthroughRoute } from "@/routes/guides/$slug/walkthroug
 
 type Props = {
   Stepper: any;
-  stepper: any;
   target: any;
 };
 
-export function SubObjectiveStep({ Stepper, stepper, target }: Props) {
+export function SubObjectiveStep({ Stepper, target }: Props) {
   return (
     <Stepper.Content step={target.slug}>
       <div className="flex min-h-0 flex-1 flex-col gap-6">

@@ -67,7 +67,6 @@ function Inner({
           <SubObjectiveStep
             key={target.slug}
             Stepper={Stepper}
-            stepper={stepper}
             target={target}
           />
         ))}
