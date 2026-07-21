@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { Separator } from "@/components/ui/separator";
+import { useState } from "react";
+import type { ContributionType } from "@/types/contributions";
 import ContributionFlow from "@/components/contribute/ContributionFlow";
 
 export const Route = createFileRoute("/contribute")({
@@ -8,18 +9,12 @@ export const Route = createFileRoute("/contribute")({
 });
 
 function RouteComponent() {
+  const [type, setType] = useState<ContributionType | null>(null);
+
   return (
-    <div className="mx-auto max-w-[1280px] border-x bg-background">
-      <section className="border-b px-8 py-8 lg:px-16">
-        <div className="mb-6">
-          <h1 className="data-label text-[14px] tracking-[0.08em] text-muted-foreground uppercase">
-            Contribute a Guide
-          </h1>
-        </div>
-
-        <Separator className="mb-8 bg-border" />
-
-        <ContributionFlow />
+    <div className="mx-auto flex min-h-[max(calc(100vh-65px),750px)] w-full max-w-[1280px] flex-col border-x bg-background">
+      <section className="flex min-h-0 flex-1 flex-col border-b px-8 py-8 lg:px-16">
+        <ContributionFlow type={type} setType={setType} />
       </section>
     </div>
   );

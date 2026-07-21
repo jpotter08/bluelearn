@@ -4,6 +4,8 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/Navbar";
 import { NotFound } from "@/components/NotFound";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/lib/authContext";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -16,7 +18,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "BlueLearn | Free Structured Knowledge.",
+        title: "Bluelearn | Free Structured Knowledge.",
       },
     ],
     links: [
@@ -37,10 +39,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <Navbar />
-
-        {children}
-        <Toaster />
+        <AuthProvider>
+          <Navbar />
+          <TooltipProvider>{children}</TooltipProvider>
+          <Toaster />
+        </AuthProvider>
 
         <Scripts />
       </body>

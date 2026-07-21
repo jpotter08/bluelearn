@@ -11,10 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubjectsRouteImport } from './routes/subjects'
 import { Route as ReviewRouteImport } from './routes/review'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ObjectivesRouteImport } from './routes/objectives'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GuidesRouteImport } from './routes/guides'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ContributeRouteImport } from './routes/contribute'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as IndexRouteImport } from './routes/index'
@@ -36,9 +39,19 @@ const ReviewRoute = ReviewRouteImport.update({
   path: '/review',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ObjectivesRoute = ObjectivesRouteImport.update({
@@ -54,6 +67,11 @@ const LoginRoute = LoginRouteImport.update({
 const GuidesRoute = GuidesRouteImport.update({
   id: '/guides',
   path: '/guides',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContributeRoute = ContributeRouteImport.update({
@@ -111,10 +129,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/browse': typeof BrowseRoute
   '/contribute': typeof ContributeRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/guides': typeof GuidesRouteWithChildren
   '/login': typeof LoginRoute
   '/objectives': typeof ObjectivesRouteWithChildren
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/review': typeof ReviewRouteWithChildren
   '/subjects': typeof SubjectsRouteWithChildren
   '/guides/$slug': typeof GuidesSlugRoute
@@ -129,9 +150,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/browse': typeof BrowseRoute
   '/contribute': typeof ContributeRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/guides': typeof GuidesRouteWithChildren
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/objectives/$slug': typeof ObjectivesSlugRoute
   '/review/$slug': typeof ReviewSlugRoute
@@ -145,10 +169,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/browse': typeof BrowseRoute
   '/contribute': typeof ContributeRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/guides': typeof GuidesRouteWithChildren
   '/login': typeof LoginRoute
   '/objectives': typeof ObjectivesRouteWithChildren
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/review': typeof ReviewRouteWithChildren
   '/subjects': typeof SubjectsRouteWithChildren
   '/guides/$slug': typeof GuidesSlugRoute
@@ -165,10 +192,13 @@ export interface FileRouteTypes {
     | '/'
     | '/browse'
     | '/contribute'
+    | '/forgot-password'
     | '/guides'
     | '/login'
     | '/objectives'
+    | '/profile'
     | '/register'
+    | '/reset-password'
     | '/review'
     | '/subjects'
     | '/guides/$slug'
@@ -183,9 +213,12 @@ export interface FileRouteTypes {
     | '/'
     | '/browse'
     | '/contribute'
+    | '/forgot-password'
     | '/guides'
     | '/login'
+    | '/profile'
     | '/register'
+    | '/reset-password'
     | '/guides/$slug'
     | '/objectives/$slug'
     | '/review/$slug'
@@ -198,10 +231,13 @@ export interface FileRouteTypes {
     | '/'
     | '/browse'
     | '/contribute'
+    | '/forgot-password'
     | '/guides'
     | '/login'
     | '/objectives'
+    | '/profile'
     | '/register'
+    | '/reset-password'
     | '/review'
     | '/subjects'
     | '/guides/$slug'
@@ -217,10 +253,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BrowseRoute: typeof BrowseRoute
   ContributeRoute: typeof ContributeRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   GuidesRoute: typeof GuidesRouteWithChildren
   LoginRoute: typeof LoginRoute
   ObjectivesRoute: typeof ObjectivesRouteWithChildren
+  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ReviewRoute: typeof ReviewRouteWithChildren
   SubjectsRoute: typeof SubjectsRouteWithChildren
 }
@@ -241,11 +280,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/objectives': {
@@ -267,6 +320,13 @@ declare module '@tanstack/react-router' {
       path: '/guides'
       fullPath: '/guides'
       preLoaderRoute: typeof GuidesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contribute': {
@@ -398,10 +458,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BrowseRoute: BrowseRoute,
   ContributeRoute: ContributeRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   GuidesRoute: GuidesRouteWithChildren,
   LoginRoute: LoginRoute,
   ObjectivesRoute: ObjectivesRouteWithChildren,
+  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ReviewRoute: ReviewRouteWithChildren,
   SubjectsRoute: SubjectsRouteWithChildren,
 }
