@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
 import { Route as ReviewSlugRoute } from "@/routes/review.$slug";
@@ -77,12 +78,23 @@ function CaseGrid({ cases }: { cases: Array<QueueCase> }) {
           className="block"
         >
           <div className="rounded-md border bg-background p-4 shadow-none transition-colors hover:bg-muted">
-            <h3 className="text-xl font-semibold tracking-tight">
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
+                Review Case
+              </p>
+              <Badge
+                variant="outline"
+                className="mono-micro rounded-full border border-badge-border bg-badge tracking-[0.08em] text-badge-foreground"
+              >
+                {reviewerStatus(c.decision)}
+              </Badge>
+            </div>
+
+            <h3 className="mt-2 text-xl font-semibold tracking-tight">
               {c.title ?? "Untitled Guide"}
             </h3>
 
             <p className="mt-2 font-mono text-[11px] tracking-[0.08em] text-muted-foreground uppercase">
-              {reviewerStatus(c.decision)} |{" "}
               {new Date(c.created_at).toLocaleDateString("en-GB", {
                 day: "numeric",
                 month: "long",
