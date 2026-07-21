@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 import type { HydratedReviewGuide } from "@/types/guides";
@@ -18,23 +18,27 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Combobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
 
+import { castDecision } from "@/lib/api/reveiws";
+
 export type Review = {
   decision: string;
   notes: string;
   reasons: Array<string>;
 };
 
-export const Route = createFileRoute("/review/$slug")({
+export const Route = createFileRoute("/review/$caseId")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { slug } = Route.useParams();
+  const { caseId } = Route.useParams();
   const [review, setReview] = useState<Review>({
     decision: "",
     notes: "",
     reasons: [],
   });
+  const [submitStatus, setSubmitStatus] = useState<"Submitting..." | "Submitted." | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const REASONS = [
     { value: "hierarchy_issue", label: "Hierarchy Issues" },
@@ -59,6 +63,28 @@ function RouteComponent() {
     guides,
     subjects
   );
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const submitDecision = useCallback(async () => {
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setSubmitStatus("Submitting...");
+    setError(null);
+    try {
+      await castDecision(caseId, review, {signal: controller.signal});
+    } catch (e) {
+      if ((e as Error).name !== "AbortError") {
+        setError((e as Error).message);
+      }
+    } finally {
+      if (abortControllerRef.current === controller) {
+        setSubmitStatus("Submitted.");
+      }
+    }
+  }, [caseId, review]);
 
   return (
     <div className="mx-auto h-[calc(100vh-70px)] max-w-[1280px] border-x bg-background">
@@ -158,7 +184,9 @@ function RouteComponent() {
               </FieldGroup>
 
               <FieldGroup>
-                <Button className="btn-pri" size="lg">
+                <Button className="btn-pri" size="lg" onClick={() => {
+                 submitDecision() 
+                }}>
                   Submit
                 </Button>
               </FieldGroup>
