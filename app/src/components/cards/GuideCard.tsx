@@ -1,8 +1,3 @@
-import { Link } from "@tanstack/react-router";
-import type { RegisteredRouter, ToPathOption } from "@tanstack/react-router";
-
-import type { BreadcrumbOrigin } from "@/lib/breadcrumbs";
-
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Footer } from "@/components/cards/Footer";
@@ -23,17 +18,10 @@ type GuideProp = {
 
 type PropTypes = {
   guide: GuideProp;
-  origin?: BreadcrumbOrigin;
-  to: ToPathOption<RegisteredRouter>;
 };
 
-export const GuideCard = ({ guide, origin, to }: PropTypes) => {
+export const GuideCard = ({ guide }: PropTypes) => {
   return (
-    // <Link
-    //   to={to}
-    //   params={{ slug: guide.slug }}
-    //   state={{ breadcrumbOrigin: origin }}
-    // >
     <Card className="group rounded-md bg-background shadow-none transition-colors hover:bg-muted">
       {/* Header */}
       <CardHeader className="relative p-4">
