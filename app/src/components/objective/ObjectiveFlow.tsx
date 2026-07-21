@@ -21,22 +21,12 @@ export default function ObjectiveFlow({ targets }: Props) {
 
   return (
     <Stepper.Root className="flex min-h-0 w-full flex-1 flex-col gap-8">
-      {({ stepper }: any) => (
-        <Inner Stepper={Stepper} stepper={stepper} targets={targets} />
-      )}
+      <Inner Stepper={Stepper} targets={targets} />
     </Stepper.Root>
   );
 }
 
-function Inner({
-  Stepper,
-  stepper,
-  targets,
-}: {
-  Stepper: any;
-  stepper: any;
-  targets: any;
-}) {
+function Inner({ Stepper, targets }: { Stepper: any; targets: any }) {
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col gap-6">
       {/* breadcrumb stepper */}
@@ -53,7 +43,7 @@ function Inner({
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                     {index + 1}
                   </span>
-                  <Stepper.Title />
+                  <Stepper.Title className="max-w-[20ch] truncate" />
                 </Stepper.Trigger>
               </Stepper.Item>
             </Fragment>
