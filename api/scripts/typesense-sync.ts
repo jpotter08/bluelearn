@@ -14,12 +14,13 @@ import type { Database } from "../src/database.types.ts";
 import {
   guidesCollectionSchema,
   objectivesCollectionSchema,
-  rowToGuideDocument,
-  rowToObjectiveDocument,
+  stripNulls,
   SEARCH_DOC_SELECT,
   OBJECTIVE_DOC_SELECT,
   type SearchDocument,
 } from "../src/services/search.service";
+import { buildGuideListItems } from "../src/services/guide.service";
+import { buildObjectiveListItems } from "../src/services/objective.service";
 
 type DB = SupabaseClient<Database>;
 
@@ -109,7 +110,9 @@ async function fetchPublishedGuides(supabase: DB): Promise<SearchDocument[]> {
     console.error("Failed to load guides from Supabase:", error.message);
     process.exit(1);
   }
-  return (data ?? []).flatMap((row) => rowToGuideDocument(row) ?? []);
+  const rows = (data ?? []).filter((row) => row.slug && row.title);
+  const items = await buildGuideListItems(supabase, rows);
+  return items.map(stripNulls);
 }
 
 async function fetchPublishedObjectives(
@@ -124,7 +127,9 @@ async function fetchPublishedObjectives(
     console.error("Failed to load objectives from Supabase:", error.message);
     process.exit(1);
   }
-  return (data ?? []).flatMap((row) => rowToObjectiveDocument(row) ?? []);
+  const rows = (data ?? []).filter((row) => row.slug && row.current?.title);
+  const items = await buildObjectiveListItems(supabase, rows);
+  return items.map(stripNulls);
 }
 
 async function indexDocuments(collection: string, docs: SearchDocument[]) {

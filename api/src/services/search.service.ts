@@ -1,10 +1,16 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Context } from "hono";
-import type { SearchQueryInput } from "@bluelearn/schemas";
+import type {
+  GuideListItem,
+  ObjectiveListItem,
+  SearchQueryInput,
+} from "@bluelearn/schemas";
 import type { Database } from "../database.types";
 // .ts extension so scripts/typesense-sync.ts stays runnable under plain
 // `node --experimental-strip-types` (extensionless relative imports fail there).
 import { ServiceError } from "../lib/service-error";
+import { buildGuideListItems } from "./guide.service";
+import { buildObjectiveListItems } from "./objective.service";
 import type { Bindings, HonoEnv } from "../types";
 
 type DB = SupabaseClient<Database>;
@@ -12,113 +18,99 @@ type DB = SupabaseClient<Database>;
 export const GUIDES_COLLECTION = "guides";
 export const OBJECTIVES_COLLECTION = "objectives";
 
-// Both content types index the same searchable surface, so they share one
-// field list. scripts/typesense-sync.ts reconciles the live collections
-// against these; re-run it with --force after changing fields.
-const searchFields = [
-  { name: "slug", type: "string" },
-  { name: "title", type: "string" },
-  { name: "subjects", type: "string[]", optional: true, facet: true },
-  { name: "summary", type: "string", optional: true },
-] as const;
+// Card rows accepted by buildGuideListItems/buildObjectiveListItems — inferred
+// rather than redeclared so search.service.ts can't drift from those shapes.
+type GuideRow = Parameters<typeof buildGuideListItems>[1][number];
+type ObjectiveRow = Parameters<typeof buildObjectiveListItems>[1][number];
 
+// Indexed guide document, same shape the /guides list endpoint returns.
 export const guidesCollectionSchema = {
   name: GUIDES_COLLECTION,
-  fields: searchFields,
+  enable_nested_fields: true,
+  fields: [
+    { name: "slug", type: "string" },
+    { name: "title", type: "string" },
+    { name: "knowledge_type", type: "string", facet: true },
+    { name: "status", type: "string", facet: true },
+    { name: "created_at", type: "string" },
+    { name: "summary", type: "string", optional: true },
+    { name: "author", type: "string", optional: true },
+    { name: "duration_minutes", type: "int32" },
+    { name: "tags", type: "object[]", optional: true, facet: true },
+  ],
 } as const;
 
+// Indexed objective document, same shape the /objectives list endpoint
+// returns.
 export const objectivesCollectionSchema = {
   name: OBJECTIVES_COLLECTION,
-  fields: searchFields,
+  enable_nested_fields: true,
+  fields: [
+    { name: "slug", type: "string" },
+    { name: "title", type: "string" },
+    { name: "summary", type: "string", optional: true },
+    { name: "curator", type: "string", optional: true },
+    { name: "created_at", type: "string" },
+    { name: "guides_total", type: "int32" },
+    { name: "duration_minutes", type: "int32" },
+    { name: "featured_sub_objective", type: "object[]", optional: true },
+  ],
 } as const;
 
-// One indexed guide or objective. Optional fields are omitted when empty —
-// Typesense rejects explicit nulls on optional fields.
-export type SearchDocument = {
-  id: string;
-  slug: string;
-  title: string;
-  subjects?: string[];
-  summary?: string;
-};
+export type SearchDocument = GuideListItem | ObjectiveListItem;
 
-function buildSearchDocument(
-  id: string,
-  slug: string,
-  title: string,
-  summary: string | null | undefined,
-  subjectLinks: { subjects: { name: string } | null }[] | undefined
-): SearchDocument {
-  const subjects = (subjectLinks ?? []).flatMap((link) =>
-    link.subjects ? [link.subjects.name] : []
-  );
-  const doc: SearchDocument = { id, slug, title };
-  if (summary) doc.summary = summary;
-  if (subjects.length > 0) doc.subjects = subjects;
+// Typesense rejects explicit nulls on optional fields; GuideListItem/
+// ObjectiveListItem carry them for nullable columns, so drop null keys
+// before indexing.
+export function stripNulls<T extends object>(item: T): T {
+  const doc = {} as T;
+  for (const [key, value] of Object.entries(item)) {
+    if (value !== null && value !== undefined)
+      (doc as Record<string, unknown>)[key] = value;
+  }
   return doc;
 }
 
-// Embed walking base -> canonical guide -> live revision for the searchable
-// fields (mirrors CANONICAL_SUMMARY in guide.service.ts, plus subject tags).
-export const SEARCH_DOC_SELECT = `id, slug, title, status,
-  canonical:guides!guide_bases_canonical_guide_id_fkey(
-    current:guide_revisions!guides_current_revision_id_fkey(
-      summary,
-      guide_revision_subjects(subjects(name))
+// Same select listPublishedGuides uses, so buildGuideListItems (author,
+// knowledge_type, tags, duration_minutes) can be reused as-is.
+export const SEARCH_DOC_SELECT =
+  `id, slug, title, knowledge_type, status, created_at,
+  canonical:guides!guide_bases_canonical_guide_id_fkey!inner(
+    author_id,
+    current:guide_revisions!guides_current_revision_id_fkey!inner(
+      id, summary, word_count
     )
   )` as const;
 
 // Map a SEARCH_DOC_SELECT row to its Typesense document. Returns null for
 // rows missing slug/title (nullable in the generated types, never null for
 // published guides) — skip those rather than indexing them.
-export function rowToGuideDocument(row: {
-  id: string;
-  slug: string | null;
-  title: string | null;
-  canonical: {
-    current: {
-      summary: string | null;
-      guide_revision_subjects: { subjects: { name: string } | null }[];
-    } | null;
-  } | null;
-}): SearchDocument | null {
+export async function rowToGuideDocument(
+  supabase: DB,
+  row: GuideRow
+): Promise<GuideListItem | null> {
   if (!row.slug || !row.title) return null;
-  const current = row.canonical?.current;
-  return buildSearchDocument(
-    row.id,
-    row.slug,
-    row.title,
-    current?.summary,
-    current?.guide_revision_subjects
-  );
+  const [item] = await buildGuideListItems(supabase, [row]);
+  return stripNulls(item);
 }
 
-// Objectives keep title/summary/tags directly on the live revision — no
-// base/canonical indirection like guides.
-export const OBJECTIVE_DOC_SELECT = `id, slug, status,
+// Same select listPublishedObjectives uses, so buildObjectiveListItems
+// (curator, guides_total, duration_minutes, featured_sub_objective) can be
+// reused as-is.
+export const OBJECTIVE_DOC_SELECT =
+  `id, slug, created_by, created_at, current_revision_id, status,
   current:objective_revisions!objectives_current_revision_id_fkey(
     title,
-    summary,
-    objective_revision_subjects(subjects(name))
+    summary
   )` as const;
 
-export function rowToObjectiveDocument(row: {
-  id: string;
-  slug: string | null;
-  current: {
-    title: string | null;
-    summary: string | null;
-    objective_revision_subjects: { subjects: { name: string } | null }[];
-  } | null;
-}): SearchDocument | null {
+export async function rowToObjectiveDocument(
+  supabase: DB,
+  row: ObjectiveRow
+): Promise<ObjectiveListItem | null> {
   if (!row.slug || !row.current?.title) return null;
-  return buildSearchDocument(
-    row.id,
-    row.slug,
-    row.current.title,
-    row.current.summary,
-    row.current.objective_revision_subjects
-  );
+  const [item] = await buildObjectiveListItems(supabase, [row]);
+  return stripNulls(item);
 }
 
 function typesenseFetch(env: Bindings, path: string, init?: RequestInit) {
@@ -137,8 +129,8 @@ function typesenseFetch(env: Bindings, path: string, init?: RequestInit) {
 // validation, and multi-search fan-out pick it up automatically.
 const SEARCH_COLLECTIONS: Record<string, { queryBy: string }> = {
   // Order is the relevance weighting: title > tags > summary.
-  [GUIDES_COLLECTION]: { queryBy: "title,subjects,summary" },
-  [OBJECTIVES_COLLECTION]: { queryBy: "title,subjects,summary" },
+  [GUIDES_COLLECTION]: { queryBy: "title,tags.name,summary" },
+  [OBJECTIVES_COLLECTION]: { queryBy: "title,summary" },
 };
 
 // One collection's slice of a multi_search response. Typesense returns either
@@ -147,7 +139,20 @@ type TypesenseSearchResult = {
   found: number;
   page: number;
   facet_counts?: unknown[];
-  hits?: { document: Record<string, unknown>; highlight?: unknown }[];
+  hits?: {
+    document: Record<string, unknown>;
+    // `highlight` is Typesense's legacy per-field format and can't point at
+    // which element of an array field (e.g. tags) matched; `highlights` is
+    // the newer array format with explicit `field`/`indices` and is what
+    // Typesense recommends for new integrations, so it's the one we keep.
+    // `text_match` loses precision above Number.MAX_SAFE_INTEGER
+    // (text_match_info.score carries the same value as a string, unaffected)
+    // and nothing here consumes relevance scores, so both are dropped.
+    highlight?: unknown;
+    highlights?: unknown;
+    text_match?: unknown;
+    text_match_info?: unknown;
+  }[];
   error?: string;
   code?: number;
 };
@@ -213,7 +218,10 @@ export async function searchCollections(
     results[collection] = {
       found: result.found,
       page: result.page,
-      hits: result.hits ?? [],
+      hits: (result.hits ?? []).map((hit) => ({
+        document: hit.document,
+        highlights: hit.highlights,
+      })),
       ...(result.facet_counts?.length && { facet_counts: result.facet_counts }),
     };
   });
@@ -265,7 +273,10 @@ export async function syncGuideDocument(
       .maybeSingle();
     if (error) throw new Error(error.message);
 
-    const doc = data?.status === "published" ? rowToGuideDocument(data) : null;
+    const doc =
+      data?.status === "published"
+        ? await rowToGuideDocument(supabase, data)
+        : null;
     await pushDocument(env, GUIDES_COLLECTION, guideBaseId, doc);
   } catch (error) {
     console.error(`Search sync failed for guide ${guideBaseId}:`, error);
@@ -287,7 +298,9 @@ export async function syncObjectiveDocument(
     if (error) throw new Error(error.message);
 
     const doc =
-      data?.status === "published" ? rowToObjectiveDocument(data) : null;
+      data?.status === "published"
+        ? await rowToObjectiveDocument(supabase, data)
+        : null;
     await pushDocument(env, OBJECTIVES_COLLECTION, objectiveId, doc);
   } catch (error) {
     console.error(`Search sync failed for objective ${objectiveId}:`, error);
