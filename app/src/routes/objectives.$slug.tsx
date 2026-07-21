@@ -32,14 +32,8 @@ function PathPage() {
     guides,
     [pathData]
   );
+
   const objective = hydratedObjectives[0];
-
-  const subObjectiveItems = [
-    { value: "", label: "Sub Objective" },
-    { value: slug, label: objective.title },
-  ];
-
-  const [subObjective, setSubObjective] = useState("");
 
   return (
     <div className="mx-auto max-w-[1280px] border-x bg-background">
@@ -50,17 +44,9 @@ function PathPage() {
             {formatDuration(objective.duration)} total)
           </h1>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" className="btn-sec" size="lg">
-              See Graph View
-            </Button>
-
-            <Combobox
-              items={subObjectiveItems}
-              value={subObjective}
-              onValueChange={setSubObjective}
-            />
-          </div>
+          <Button variant="outline" className="btn-sec" size="lg">
+            See Graph View
+          </Button>
         </div>
 
         <Separator className="mb-4 bg-border" />
