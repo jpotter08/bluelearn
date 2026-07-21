@@ -1011,8 +1011,8 @@ export type Database = {
         Returns: {
           id: string
           slug: string
-          title: string
           summary: string
+          title: string
         }[]
       }
       project_objective_edges: {
