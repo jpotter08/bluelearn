@@ -48,13 +48,7 @@ const createGuideContData = (): GuideContribution => ({
 const createObjectiveContData = (): ObjectiveContribution => ({
   title: "",
   summary: "",
-  targets: [
-    "arithmetic-introduction",
-    "algebra-how-to-express-equations",
-    "calculus-introduction",
-    "vectors-introduction",
-    "mechanics-how-to-apply-newtons-laws",
-  ],
+  targets: [],
   featured: "",
   subObjectives: [],
 });
@@ -294,7 +288,7 @@ function Inner({
               )}
 
               <Stepper.Item step={step.id}>
-                <Stepper.Trigger className="mono-micro flex items-center gap-2 rounded-full border border-border bg-background px-2 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted data-[status=active]:border-primary data-[status=active]:bg-primary/10 data-[status=active]:text-primary data-[status=active]:ring-1 data-[status=active]:ring-primary/20">
+                <Stepper.Trigger className="mono-micro flex items-center gap-2 rounded-full border border-border bg-background px-2 py-2 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted data-[status=active]:border-primary data-[status=active]:bg-primary/10 data-[status=active]:text-primary data-[status=active]:ring-1 data-[status=active]:ring-primary/20">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                     {index + 1}
                   </span>
