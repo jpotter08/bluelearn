@@ -4,7 +4,12 @@ import type { Dispatch, SetStateAction } from "react";
 import type { GuideContribution } from "@/types/contributions";
 
 import { StepperActionHeader } from "@/components/contribute/StepperActionHeader";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 import { Badge } from "@/components/ui/badge";
@@ -56,9 +61,18 @@ export const GuideDetails = ({
       />
 
       <FieldGroup>
-        <FieldLabel required className="font-mono tracking-[0.08em] uppercase">
-          Type
-        </FieldLabel>
+        <div className="space-y-1">
+          <FieldLabel
+            required
+            className="font-mono tracking-[0.08em] uppercase"
+          >
+            Type
+          </FieldLabel>
+          <FieldDescription className="text-xs">
+            Choose whether this guide explains a concept or teaches a process
+            for accomplishing a goal.
+          </FieldDescription>
+        </div>
         <Field className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4">
           <button
             className="mono-micro rounded-full border border-badge-border p-4 tracking-[0.08em] text-badge-foreground"
@@ -97,12 +111,17 @@ export const GuideDetails = ({
           </button>
         </Field>
         <Field className="space-y-2">
-          <FieldLabel
-            required
-            className="font-mono tracking-[0.08em] uppercase"
-          >
-            Title
-          </FieldLabel>
+          <div className="space-y-1">
+            <FieldLabel
+              required
+              className="font-mono tracking-[0.08em] uppercase"
+            >
+              Title
+            </FieldLabel>
+            <FieldDescription className="text-xs">
+              A clear, concise name for your guide.
+            </FieldDescription>
+          </div>
 
           <Input
             id="title"
@@ -123,12 +142,17 @@ export const GuideDetails = ({
         </Field>
 
         <Field className="space-y-2">
-          <FieldLabel
-            required
-            className="font-mono tracking-[0.08em] uppercase"
-          >
-            Summary
-          </FieldLabel>
+          <div className="space-y-1">
+            <FieldLabel
+              required
+              className="font-mono tracking-[0.08em] uppercase"
+            >
+              Summary
+            </FieldLabel>
+            <FieldDescription className="text-xs">
+              Briefly describe what the reader will learn from this guide.
+            </FieldDescription>
+          </div>
 
           <textarea
             className="h-32 w-full min-w-0 resize-none rounded-md border border-input bg-input/20 p-2 text-sm transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-xs/relaxed file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 md:text-xs/relaxed dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
@@ -146,12 +170,18 @@ export const GuideDetails = ({
         </Field>
 
         <Field className="space-y-2">
-          <FieldLabel
-            required
-            className="font-mono tracking-[0.08em] uppercase"
-          >
-            Subjects
-          </FieldLabel>
+          <div className="space-y-1">
+            <FieldLabel
+              required
+              className="font-mono tracking-[0.08em] uppercase"
+            >
+              Subjects
+            </FieldLabel>
+            <FieldDescription className="text-xs">
+              Select existing subjects or add a new subject below. At least one
+              is required.
+            </FieldDescription>
+          </div>
 
           <Combobox
             multiple
@@ -171,9 +201,14 @@ export const GuideDetails = ({
           />
         </Field>
         <Field className="space-y-2">
-          <FieldLabel className="font-mono tracking-[0.08em] uppercase">
-            New Subjects
-          </FieldLabel>
+          <div className="space-y-1">
+            <FieldLabel className="font-mono tracking-[0.08em] uppercase">
+              New Subjects
+            </FieldLabel>
+            <FieldDescription className="text-xs">
+              Create a subject if it doesn't exist yet.
+            </FieldDescription>
+          </div>
           <div className="flex items-center justify-between gap-4">
             <Input
               id="new-subject-name"
@@ -251,9 +286,14 @@ export const GuideDetails = ({
         )}
 
         <Field className="space-y-2">
-          <FieldLabel className="font-mono tracking-[0.08em] uppercase">
-            Prerequsite Guides
-          </FieldLabel>
+          <div className="space-y-1">
+            <FieldLabel className="font-mono tracking-[0.08em] uppercase">
+              Prerequsite Guides
+            </FieldLabel>
+            <FieldDescription className="text-xs">
+              Existing guides a reader should understand first.
+            </FieldDescription>
+          </div>
 
           <Combobox
             multiple
@@ -277,9 +317,14 @@ export const GuideDetails = ({
         </Field>
 
         <Field className="space-y-2">
-          <FieldLabel className="font-mono tracking-[0.08em] uppercase">
-            Todo Prerequsite Guides
-          </FieldLabel>
+          <div className="space-y-1">
+            <FieldLabel className="font-mono tracking-[0.08em] uppercase">
+              Todo Prerequsite Guides
+            </FieldLabel>
+            <FieldDescription className="text-xs">
+              Note missing prerequisite guides that don't exist yet.
+            </FieldDescription>
+          </div>
 
           <div className="flex items-center justify-between gap-4">
             <Input
