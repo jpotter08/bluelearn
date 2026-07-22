@@ -109,9 +109,7 @@ async function countObjectivesBySubject(supabase: DB) {
   );
 }
 
-// Create-or-fetch by slug: subjects are only created through contribution flows,
-// where a re-saved draft or a name two drafts share must resolve to the existing
-// row.
+// Creates new subject or returns subject if it already exists.
 export async function createSubject(
   supabase: DB,
   userId: string,

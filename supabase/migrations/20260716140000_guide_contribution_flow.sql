@@ -4,7 +4,6 @@ create type public.subject_status as enum ('draft', 'published');
 alter table public.subjects
   add column status public.subject_status not null default 'draft';
 
--- Everything that already exists is live.
 update public.subjects set status = 'published';
 drop policy "Subjects are viewable by everyone" on public.subjects;
 create policy "Published subjects are viewable by everyone"
@@ -16,8 +15,6 @@ create policy "Published subjects are viewable by everyone"
     or public.has_role('admin')
   );
 
--- Authors can already add edges/todos. They also need to delete them to replace
--- a draft's prerequisites, but only on their own base while it's still a draft.
 create policy "Authors can remove edges on their draft topics"
   on public.guide_edges for delete
   to authenticated
@@ -47,7 +44,7 @@ create policy "Authors can remove todos on their draft topics"
   );
 
 -- A revision can only be submitted once it's complete: title, summary, body and
--- at least one tag. Prereqs and todos are optional.
+-- at least one tag (prereqs and todos are optional).
 create or replace function public.submit_guide_revision(p_revision_id uuid)
 returns uuid
 language plpgsql
@@ -95,7 +92,7 @@ begin
   select current_revision_id into v_current_revision_id
     from public.guides where id = v_guide_id;
 
-  -- No live revision yet means this is the first publish, otherwise it's an edit.
+  -- No live revision yet means this is the first publish (otherwise it's a revision).
   v_case_type := case
     when v_current_revision_id is null then 'guide_publish'
     else 'guide_edit'

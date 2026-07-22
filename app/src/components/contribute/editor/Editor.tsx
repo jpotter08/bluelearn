@@ -56,7 +56,7 @@ export default function Editor({
     }, 1000);
   };
 
-  // flush a pending edit if we leave before the debounce fires
+  // Force a save on a pending edit if user leaves before the debounce fires
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) {
@@ -82,7 +82,7 @@ export default function Editor({
       linkDialogPlugin(),
       tablePlugin(),
       imagePlugin({
-        disableImageSettingsButton: true,
+        EditImageToolbar: () => null,
         imageUploadHandler: (file) =>
           onUploadImageRef.current
             ? onUploadImageRef.current(file)

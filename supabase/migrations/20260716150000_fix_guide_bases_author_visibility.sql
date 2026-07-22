@@ -1,5 +1,6 @@
--- Previous id was bound to guides.id in the subquery, so authors never saw
--- their own draft base, which in turn broke the edge/todo delete policies.
+-- Previous id was bound to guides.id in the policy within
+-- 20260513193200_guides.sql, so authors couldn't see
+-- their own draft bases before.
 drop policy "Published topics are viewable by everyone" on public.guide_bases;
 create policy "Published topics are viewable by everyone"
   on public.guide_bases for select

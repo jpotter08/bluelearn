@@ -137,20 +137,15 @@ function Inner({
     });
   };
 
-  // Draft revision id once it exists: null before the first save, so we know to
-  // create vs. patch.
   const [revisionId, setRevisionId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // subject/guide options are fetched once here and shared by the details step
-  // (comboboxes) and the submit step (resolving slugs to names for the preview).
   const [subjectOptions, setSubjectOptions] = useState<
     Awaited<ReturnType<typeof listSubjects>>
   >([]);
   const [guideOptions, setGuideOptions] = useState<
     Awaited<ReturnType<typeof listGuides>>
   >([]);
-  // author handle for the preview byline
   const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
@@ -170,9 +165,8 @@ function Inner({
     return () => controller.abort();
   }, []);
 
-  // shape the in-progress form as a HydratedGuide so the submit step can render
-  // it with the same component the published page uses. slugs are resolved back
-  // to names/titles from the fetched lists for the tag/prereq labels.
+  // Shape the in-progress form as a HydratedGuide, so the submit step can render
+  // it with the same component the published page uses.
   const previewGuide: HydratedGuide = useMemo(() => {
     const nameBySlug = new Map(
       subjectOptions.map((s) => [s.slug, s.name] as const)
@@ -228,9 +222,6 @@ function Inner({
   });
 
   const creatingRef = useRef<Promise<string> | null>(null);
-
-  // Create the guide on first save, patch it after. Returns the revision id.
-  // Concurrent callers share the single create so we never mint two guides.
   const persistDraft = async () => {
     if (revisionId) {
       await updateRevision(revisionId, draftFields());
@@ -254,7 +245,7 @@ function Inner({
     return creatingRef.current;
   };
 
-  // Creates the draft first if needed so the image has a revision to attach to.
+  // Creates the draft first if needed, so the image has a revision to attach to.
   const uploadGuideImage = async (file: File) => {
     try {
       const id = revisionId ?? (await persistDraft());
