@@ -56,7 +56,7 @@ export const GuideDetails = ({
       />
 
       <FieldGroup>
-        <FieldLabel className="font-mono tracking-[0.08em] uppercase">
+        <FieldLabel required className="font-mono tracking-[0.08em] uppercase">
           Type
         </FieldLabel>
         <Field className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4">

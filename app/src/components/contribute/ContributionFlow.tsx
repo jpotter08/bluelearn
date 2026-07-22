@@ -35,7 +35,7 @@ type PropTypes = {
 };
 
 const createGuideContData = (): GuideContribution => ({
-  type: "",
+  type: "theoretical",
   title: "",
   summary: "",
   body: "",
