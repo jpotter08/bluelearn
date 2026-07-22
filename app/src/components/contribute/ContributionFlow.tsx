@@ -1,6 +1,6 @@
 import { defineStepper } from "@stepperize/react";
 import { ChevronRight } from "lucide-react";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import type { Dispatch, SetStateAction } from "react";
@@ -15,6 +15,7 @@ import { createGuide, listGuides } from "@/lib/api/guides";
 import { getMyIdentity } from "@/lib/api/identity";
 import { listSubjects } from "@/lib/api/subjects";
 import { submitRevision, updateRevision } from "@/lib/api/guideRevisions";
+import { uploadMedia } from "@/lib/api/media";
 import { estimateReadMinutes, formatDate } from "@/lib/guideUtils";
 
 import { SelectType } from "@/components/contribute/steps/SelectType";
@@ -226,20 +227,43 @@ function Inner({
     todoPrereqs: guideContData.todoPrereqs,
   });
 
+  const creatingRef = useRef<Promise<string> | null>(null);
+
   // Create the guide on first save, patch it after. Returns the revision id.
+  // Concurrent callers share the single create so we never mint two guides.
   const persistDraft = async () => {
     if (revisionId) {
       await updateRevision(revisionId, draftFields());
       return revisionId;
     }
 
-    const id = await createGuide({
-      knowledge_type:
-        guideContData.type === "practical" ? "practical" : "theoretical",
-      ...draftFields(),
-    });
-    setRevisionId(id);
-    return id;
+    if (!creatingRef.current) {
+      creatingRef.current = createGuide({
+        knowledge_type:
+          guideContData.type === "practical" ? "practical" : "theoretical",
+        ...draftFields(),
+      })
+        .then((id) => {
+          setRevisionId(id);
+          return id;
+        })
+        .finally(() => {
+          creatingRef.current = null;
+        });
+    }
+    return creatingRef.current;
+  };
+
+  // Creates the draft first if needed so the image has a revision to attach to.
+  const uploadGuideImage = async (file: File) => {
+    try {
+      const id = revisionId ?? (await persistDraft());
+      const { url } = await uploadMedia(file, id);
+      return url;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not upload image");
+      throw e;
+    }
   };
 
   const saveDraft = async () => {
@@ -326,6 +350,7 @@ function Inner({
           onBodyChange={(body) =>
             setGuideContData((prev) => ({ ...prev, body }))
           }
+          onUploadImage={uploadGuideImage}
           onSaveDraft={saveDraft}
           submitting={submitting}
         />

@@ -26,15 +26,22 @@ type EditorProps = {
   // Markdown to open with, e.g. when resuming a draft.
   value?: string;
   onChange?: (markdown: string) => void;
+  onUploadImage?: (file: File) => Promise<string>;
 };
 
-export default function Editor({ value, onChange }: EditorProps) {
+export default function Editor({
+  value,
+  onChange,
+  onUploadImage,
+}: EditorProps) {
   const [initialMarkdown] = useState<string>(() => value ?? "");
 
   const editorRef = useRef<MDXEditorMethods>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const onUploadImageRef = useRef(onUploadImage);
+  onUploadImageRef.current = onUploadImage;
   const latestRef = useRef<string | null>(null);
 
   // debounce so we don't re-render the flow on every keystroke
@@ -74,7 +81,12 @@ export default function Editor({ value, onChange }: EditorProps) {
       linkPlugin(),
       linkDialogPlugin(),
       tablePlugin(),
-      imagePlugin(),
+      imagePlugin({
+        imageUploadHandler: (file) =>
+          onUploadImageRef.current
+            ? onUploadImageRef.current(file)
+            : Promise.reject(new Error("Image upload is not available")),
+      }),
       codeBlockPlugin({
         defaultCodeBlockLanguage: "javascript",
       }),
