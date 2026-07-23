@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { Separator } from "@/components/ui/separator";
+
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 import { Route as ReviewCaseIdRoute } from "@/routes/review.$caseId";
 import { getReviewQueue } from "@/lib/api/reviews";
