@@ -1,26 +1,29 @@
-// import { useState } from "react";
 import { useMemo } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { VariantContribution } from "@/types/contributions";
 
-import { StepperActionHeader } from "@/components/contribute/StepperActionHeader";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Combobox } from "@/components/ui/combobox";
+import { StepperActionHeader } from "@/components/contribute/StepperActionHeader";
 
 import subjectsData from "@/data/subjects.json";
 import guidesData from "@/data/guides.json";
-import { Combobox } from "@/components/ui/combobox";
 
 type PropTypes = {
   Stepper: any;
   variantContData: VariantContribution;
   setVariantContData: Dispatch<SetStateAction<VariantContribution>>;
+  onSaveDraft: () => void;
+  submitting?: boolean;
 };
 
 export const VariantDetails = ({
   Stepper,
   variantContData,
   setVariantContData,
+  onSaveDraft,
+  submitting,
 }: PropTypes) => {
   const isNextDisabled = useMemo(() => {
     return (
@@ -40,6 +43,8 @@ export const VariantDetails = ({
         title={"Variant Details"}
         Stepper={Stepper}
         nextDisabled={isNextDisabled}
+        onSaveDraft={onSaveDraft}
+        submitting={submitting}
       />
 
       <FieldGroup>
