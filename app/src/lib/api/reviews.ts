@@ -3,7 +3,7 @@ import type { CreateDecisionInput } from "../../../../packages/schemas/src/revie
 import type { FeaturedNode } from "../../../../packages/schemas/src/objectives";
 import { client } from "@/lib/api/apiClient";
 
-const reveiws = client.reviews;
+const reviews = client.reviews;
 
 type FetchOptions = { signal?: AbortSignal };
 
@@ -19,23 +19,23 @@ async function assertOk(res: Response) {
 }
 
 export async function getReviewQueue({ signal }: FetchOptions = {}) {
-  const res = await reveiws.queue.$get({ init: { signal } });
+  const res = await reviews.queue.$get({ init: { signal } });
   await assertOk(res);
   const { cases: data } = await res.json();
 
   return data;
 }
 
-export async function listReveiwCases({ signal }: FetchOptions = {}) {
-  const res = await reveiws.cases.$get({ init: { signal } });
+export async function listReviewCases({ signal }: FetchOptions = {}) {
+  const res = await reviews.cases.$get({ init: { signal } });
   await assertOk(res);
   const { cases: data } = await res.json();
 
   return data;
 }
 
-export async function getReveiwCase(id: string, { signal }: FetchOptions = {}) {
-  const res = await reveiws.cases[":id"].$get(
+export async function getReviewCase(id: string, { signal }: FetchOptions = {}) {
+  const res = await reviews.cases[":id"].$get(
     { param: { id } },
     { init: { signal } }
   );
@@ -74,7 +74,7 @@ export async function castDecision(
     throw new Error(`Reveiw post request made with missing body features.`);
   }
   // json payload
-  const res = await reveiws.cases[":id"].decisions.$post(
+  const res = await reviews.cases[":id"].decisions.$post(
     {
       json: payload,
       param: { id },
