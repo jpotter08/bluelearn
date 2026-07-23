@@ -69,7 +69,7 @@
   --popover: #171b1f;
   --popover-foreground: var(--foreground);
 
-  --primary: #042f6a;
+  --primary: var(--brand-blue);
   --primary-foreground: #ffffff;
 
   --secondary: #202429;
@@ -78,7 +78,7 @@
   --muted: #1c2024;
   --muted-foreground: #c3cad1;
 
-  --brand-cta: #111827;
+  --brand-cta: var(--brand-surface);
 
   --accent: #1f2b31;
   --accent-foreground: var(--foreground);
@@ -137,19 +137,15 @@
 
   /* -- CTA BUTTON -- */
   .btn-cta {
-    @apply inline-flex items-center justify-center rounded-md px-4 py-2 font-mono text-xs font-bold text-white uppercase transition-all duration-200;
-    background: var(--brand-cta);
+    @apply inline-flex items-center justify-center rounded-md bg-brand-cta px-4 py-2 font-mono text-xs font-bold text-white uppercase transition-all duration-200 dark:text-black;
   }
 
   .btn-cta:hover {
-    background: var(--brand-cta);
-    color: var(--muted);
     transform: scale(1.05);
   }
 
   .btn-pri {
-    @apply inline-flex items-center justify-center rounded-md px-4 py-2 font-mono text-xs font-bold text-black uppercase transition-all duration-200;
-    background: var(--brand-blue);
+    @apply inline-flex items-center justify-center rounded-md bg-brand-blue px-4 py-2 font-mono text-xs font-bold text-black uppercase transition-all duration-200 hover:bg-brand-blue dark:text-white;
   }
 
   .btn-pri:hover {
@@ -157,7 +153,7 @@
   }
 
   .btn-sec {
-    @apply inline-flex items-center justify-center rounded-md border-1 border-border px-4 py-2 font-mono text-xs font-bold text-black uppercase transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-md border-1 border-border px-4 py-2 font-mono text-xs font-bold text-black uppercase transition-all duration-200 dark:text-white;
     background: var(--muted);
   }
 
