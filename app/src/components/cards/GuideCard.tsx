@@ -30,7 +30,7 @@ type PropTypes = {
 
 export const GuideCard = ({ guide, to, origin }: PropTypes) => {
   const card = (
-    <Card className="group rounded-md bg-background shadow-none transition-colors hover:bg-muted">
+    <Card className="group h-full rounded-md bg-background shadow-none transition-colors hover:bg-muted">
       {/* Header */}
       <CardHeader className="relative p-4">
         <div className="flex items-center justify-between">
