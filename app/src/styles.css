@@ -100,7 +100,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply scrollbar-thumb-border scrollbar-track-muted bg-background text-foreground;
+    /* scrollbar-color: var(--muted) var(--popover); */
   }
 
   button:not(:disabled),
